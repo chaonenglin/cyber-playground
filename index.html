@@ -14,7 +14,6 @@
     align-items: center;
     justify-content: center;
     padding: 2rem;
-    overflow: hidden;
   }
   h1 {
     color: rgba(255,255,255,.85);
@@ -120,7 +119,7 @@
 <body>
 
 <h1>🎪 赛博游乐场</h1>
-<div class="sub">选一个玩吧 · 也可以按数字键 1 2 3</div>
+<div class="sub">选一个玩吧 · 按数字键 1 - 5 快速切换</div>
 
 <div class="grid">
   <a class="card" data-c="0" href="muyu.html">
@@ -141,10 +140,22 @@
     <span class="name">无限猫猫</span>
     <span class="desc">召唤猫猫 · 收集图鉴<br>每只都不一样</span>
   </a>
+  <a class="card" data-c="3" href="reroll.html">
+    <span class="hotkey">4</span>
+    <span class="icon">🌀</span>
+    <span class="name">人生重开</span>
+    <span class="desc">随机生成新人生<br>属性 · 天赋 · 命运总结</span>
+  </a>
+  <a class="card" data-c="4" href="bubbles.html">
+    <span class="hotkey">5</span>
+    <span class="icon">🫧</span>
+    <span class="name">情绪泡泡</span>
+    <span class="desc">戳泡泡减压 · 连击特效<br>无限放空</span>
+  </a>
 </div>
 
 <div class="footer">
-  <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> 快速切换 &nbsp;·&nbsp; 每个页面都支持 <kbd>空格</kbd>
+  <kbd>1</kbd>–<kbd>5</kbd> 快速切换 &nbsp;·&nbsp; 每个页面都支持 <kbd>空格</kbd>
 </div>
 
 <script>
@@ -154,6 +165,8 @@
     if (e.key === '1') links[0]?.click();
     if (e.key === '2') links[1]?.click();
     if (e.key === '3') links[2]?.click();
+    if (e.key === '4') links[3]?.click();
+    if (e.key === '5') links[4]?.click();
   });
 </script>
 </body>

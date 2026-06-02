@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>赛博放空 · 情绪泡泡</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100svh;
+    background: linear-gradient(180deg, #0a0a1a, #1a0a2e, #0a1a2e);
+    font-family: system-ui, 'Segoe UI', sans-serif;
+    overflow: hidden;
+    touch-action: manipulation;
+    cursor: default;
+    user-select: none;
+  }
+
+  h1 {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,.4);
+    font-size: .85rem;
+    font-weight: 300;
+    letter-spacing: .2em;
+    z-index: 10;
+    pointer-events: none;
+    text-align: center;
+  }
+
+  .stats-bar {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    color: rgba(255,255,255,.3);
+    font-size: .75rem;
+    z-index: 10;
+    pointer-events: none;
+    text-align: right;
+  }
+  .stats-bar span { color: rgba(255,255,255,.6); }
+
+  .bubble-area {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 1;
+  }
+
+  .bubble {
+    position: absolute;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .15s ease;
+    will-change: transform;
+    z-index: 2;
+    animation: float linear infinite;
+    touch-action: manipulation;
+  }
+  .bubble:active {
+    transform: scale(.85) !important;
+  }
+  .bubble .emoji {
+    pointer-events: none;
+    user-select: none;
+    position: relative;
+    z-index: 1;
+  }
+
+  @keyframes float {
+    0%   { transform: translateY(0) rotate(0); }
+    25%  { transform: translateY(-10px) rotate(2deg); }
+    50%  { transform: translateY(-5px) rotate(-1deg); }
+    75%  { transform: translateY(-15px) rotate(1deg); }
+    100% { transform: translateY(0) rotate(0); }
+  }
+
+  .pop-effect {
+    position: absolute;
+    pointer-events: none;
+    border-radius: 50%;
+    animation: popAnim .5s ease-out forwards;
+    z-index: 5;
+  }
+  @keyframes popAnim {
+    0%   { transform: scale(1); opacity: 1; }
+    50%  { transform: scale(1.8); opacity: .6; }
+    100% { transform: scale(2.5); opacity: 0; }
+  }
+
+  .pop-particle {
+    position: fixed;
+    pointer-events: none;
+    z-index: 6;
+    animation: particleFly .8s ease-out forwards;
+  }
+  @keyframes particleFly {
+    0%   { opacity: 1; transform: translate(0,0) scale(1); }
+    100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0); }
+  }
+
+  .score-popup {
+    position: fixed;
+    pointer-events: none;
+    z-index: 20;
+    font-weight: 700;
+    animation: scoreFloat 1s ease-out forwards;
+  }
+  @keyframes scoreFloat {
+    0%   { opacity: 1; transform: translateY(0) scale(.5); }
+    30%  { transform: translateY(-20px) scale(1.2); }
+    100% { opacity: 0; transform: translateY(-80px) scale(1); }
+  }
+
+  .controls {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    z-index: 10;
+  }
+  .controls button {
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.06);
+    color: rgba(255,255,255,.4);
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: .75rem;
+    transition: all .2s;
+    touch-action: manipulation;
+  }
+  .controls button:hover {
+    background: rgba(255,255,255,.08);
+    color: rgba(255,255,255,.7);
+  }
+
+  .combo-text {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    font-size: 4rem;
+    font-weight: 800;
+    pointer-events: none;
+    z-index: 30;
+    animation: comboAnim .7s ease-out forwards;
+  }
+  @keyframes comboAnim {
+    0%   { opacity: 1; transform: translate(-50%,-50%) scale(.3); }
+    40%  { opacity: 1; transform: translate(-50%,-50%) scale(1.3); }
+    100% { opacity: 0; transform: translate(-50%,-60%) scale(1); }
+  }
+
+  .mood-bg {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 0;
+    transition: background .3s;
+  }
+</style>
+</head>
+<body>
+
+<div class="mood-bg" id="moodBg"></div>
+<h1>🫧 赛博放空 · 戳泡泡</h1>
+
+<div class="stats-bar">
+  💥 <span id="score">0</span> &nbsp;·&nbsp; 🔥 <span id="combo">0</span>
+</div>
+
+<div class="bubble-area" id="bubbleArea"></div>
+
+<div class="controls">
+  <button onclick="clearAll()">🧹 清空</button>
+  <button onclick="moreBubbles(10)">🎈 +10</button>
+  <button onclick="autoPop()">🤖 自动</button>
+</div>
+
+<script>
+const emojis = [
+  '😊','😂','🤗','🥳','😎','🤩','💩','👻','🤡','🫠',
+  '🌟','⭐','💫','✨','🌈','🔥','💖','🍀','🎉','🎊',
+  '🍕','🍔','🍟','🌮','🍣','🥟','🧋','🍩','🍪','🧁',
+  '🐱','🐶','🐼','🐸','🦄','🐧','🦋','🐙','🦀','🐳',
+  '💎','🔮','🎯','🚀','🎸','🌈','🍀','🧸','🎲','🎭',
+];
+
+const colors = [
+  'rgba(255,100,100,.25)', 'rgba(255,200,50,.25)', 'rgba(100,255,100,.25)',
+  'rgba(50,200,255,.25)', 'rgba(200,100,255,.25)', 'rgba(255,100,200,.25)',
+  'rgba(255,255,100,.2)', 'rgba(100,255,255,.2)',
+];
+
+let score = 0;
+let combo = 0;
+let lastPop = 0;
+let autoTimer = null;
+let bubbleId = 0;
+
+function random(min, max) { return Math.random() * (max - min) + min; }
+
+function createBubble() {
+  const area = document.getElementById('bubbleArea');
+  const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+  const size = random(50, 90);
+  const x = random(0, window.innerWidth - size);
+  const y = random(60, window.innerHeight - size - 80);
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  const dur = random(3, 7);
+  const delay = random(0, 3);
+
+  const el = document.createElement('div');
+  el.className = 'bubble';
+  el.id = 'b' + (bubbleId++);
+  el.style.width = size + 'px';
+  el.style.height = size + 'px';
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  el.style.background = `radial-gradient(circle at 35% 30%, ${color.replace('.25','.35')}, ${color})`;
+  el.style.boxShadow = `inset 0 -4px 12px rgba(0,0,0,.1), 0 4px 20px ${color}`;
+  el.style.animationDuration = dur + 's';
+  el.style.animationDelay = delay + 's';
+  el.style.fontSize = (size * .45) + 'px';
+
+  const span = document.createElement('span');
+  span.className = 'emoji';
+  span.textContent = emoji;
+  el.appendChild(span);
+
+  el.addEventListener('click', function(e) { popBubble(this, e); });
+  el.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    popBubble(this, e);
+  }, { passive: false });
+
+  area.appendChild(el);
+}
+
+function popBubble(el, e) {
+  if (!el || !el.parentNode) return;
+
+  const rect = el.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const size = rect.width;
+
+  // 连击
+  const now = Date.now();
+  if (now - lastPop < 500) {
+    combo++;
+  } else {
+    combo = 0;
+  }
+  lastPop = now;
+
+  // 分数
+  const pts = 1 + Math.floor(combo / 5);
+  score += pts;
+  document.getElementById('score').textContent = score;
+  document.getElementById('combo').textContent = combo > 0 ? combo : '0';
+
+  // 爆炸特效
+  const popEl = document.createElement('div');
+  popEl.className = 'pop-effect';
+  popEl.style.width = size + 'px';
+  popEl.style.height = size + 'px';
+  popEl.style.left = (cx - size/2) + 'px';
+  popEl.style.top = (cy - size/2) + 'px';
+  popEl.style.background = el.style.background;
+  popEl.style.boxShadow = `0 0 40px ${el.style.background}`;
+  document.body.appendChild(popEl);
+  setTimeout(() => popEl.remove(), 500);
+
+  // 粒子
+  const emoji2 = el.querySelector('.emoji')?.textContent || '✨';
+  for (let i = 0; i < 5; i++) {
+    const p = document.createElement('div');
+    p.className = 'pop-particle';
+    p.textContent = emoji2;
+    p.style.fontSize = (size * .3) + 'px';
+    p.style.left = cx + 'px';
+    p.style.top = cy + 'px';
+    p.style.setProperty('--dx', random(-80, 80) + 'px');
+    p.style.setProperty('--dy', random(-100, -30) + 'px');
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 800);
+  }
+
+  // 分数弹出
+  const popup = document.createElement('div');
+  popup.className = 'score-popup';
+  popup.textContent = `+${pts}`;
+  popup.style.left = cx + 'px';
+  popup.style.top = cy + 'px';
+  popup.style.color = `hsl(${Math.random()*360}, 80%, 60%)`;
+  popup.style.fontSize = (1 + combo/10) + 'rem';
+  document.body.appendChild(popup);
+  setTimeout(() => popup.remove(), 1000);
+
+  // 连击大特效
+  const comboThresholds = [10, 25, 50, 100];
+  if (comboThresholds.includes(combo)) {
+    showCombo(combo);
+  }
+
+  // 移除气泡
+  el.remove();
+
+  // 补一个新气泡
+  setTimeout(createBubble, 300);
+}
+
+function showCombo(n) {
+  const el = document.createElement('div');
+  el.className = 'combo-text';
+  const msgs = {
+    10: '🔟 连击！',
+    25: '💥 25连！手速惊人',
+    50: '🔥🔥 50连！泡泡克星',
+    100: '⚡ 100连！人形泡泡粉碎机',
+  };
+  el.textContent = msgs[n] || `${n}连！`;
+  const hue = Math.random() * 360;
+  el.style.color = `hsl(${hue}, 100%, 65%)`;
+  el.style.textShadow = `0 0 60px hsla(${hue}, 100%, 65%, .4)`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 700);
+}
+
+function moreBubbles(n) {
+  for (let i = 0; i < n; i++) {
+    setTimeout(createBubble, i * 60);
+  }
+}
+
+function clearAll() {
+  document.querySelectorAll('.bubble').forEach(b => {
+    // 加个消失动画
+    b.style.transition = 'opacity .3s, transform .3s';
+    b.style.opacity = '0';
+    b.style.transform = 'scale(0)';
+    setTimeout(() => b.remove(), 300);
+  });
+  // 补几个
+  setTimeout(() => moreBubbles(5), 400);
+}
+
+function autoPop() {
+  if (autoTimer) {
+    clearInterval(autoTimer);
+    autoTimer = null;
+    document.querySelector('.controls button:last-child').style.color = 'rgba(255,255,255,.4)';
+    return;
+  }
+  document.querySelector('.controls button:last-child').style.color = '#ffd700';
+  autoTimer = setInterval(() => {
+    const bubbles = document.querySelectorAll('.bubble');
+    if (bubbles.length > 0) {
+      const b = bubbles[Math.floor(Math.random() * bubbles.length)];
+      popBubble(b, {});
+    }
+  }, 400);
+}
+
+// 初始生成
+window.addEventListener('load', () => {
+  moreBubbles(20);
+});
+
+// 定时补泡泡
+setInterval(() => {
+  const count = document.querySelectorAll('.bubble').length;
+  if (count < 25) moreBubbles(5);
+  else if (count < 15) moreBubbles(10);
+}, 3000);
+
+// 键盘
+document.addEventListener('keydown', e => {
+  if (e.key === ' ' || e.key === 'Enter') {
+    e.preventDefault();
+    const bubbles = document.querySelectorAll('.bubble');
+    if (bubbles.length > 0) {
+      const b = bubbles[Math.floor(Math.random() * bubbles.length)];
+      const rect = b.getBoundingClientRect();
+      popBubble(b, { clientX: rect.left, clientY: rect.top });
+    }
+  }
+});
+</script>
+</body>
+</html>
