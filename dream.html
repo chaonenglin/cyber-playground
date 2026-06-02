@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>赛博梦境 · 每晚一个怪梦</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100svh;
+    background: linear-gradient(135deg, #0a0a1a 0%, #120828 40%, #080818 100%);
+    font-family: system-ui, 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    touch-action: manipulation;
+    overflow-x: hidden;
+  }
+  .container {
+    text-align: center;
+    max-width: 480px;
+    width: 100%;
+  }
+  h1 {
+    color: rgba(200,180,255,.5);
+    font-size: 1.2rem;
+    font-weight: 300;
+    letter-spacing: .3em;
+    margin-bottom: .2rem;
+  }
+  .sub {
+    color: rgba(200,180,255,.15);
+    font-size: .7rem;
+    margin-bottom: 1.5rem;
+    letter-spacing: .15em;
+  }
+
+  /* 星星背景 */
+  .stars {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: rgba(255,255,255,.3);
+    border-radius: 50%;
+    animation: twinkle var(--d) ease-in-out infinite alternate;
+  }
+  @keyframes twinkle {
+    0% { opacity: .1; }
+    100% { opacity: .8; }
+  }
+
+  .bed-area {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 1.5rem;
+  }
+  .moon {
+    font-size: 3.5rem;
+    display: block;
+    margin-bottom: .5rem;
+    filter: drop-shadow(0 0 30px rgba(200,180,255,.1));
+    animation: moonGlow 4s ease-in-out infinite alternate;
+    cursor: pointer;
+    transition: transform .3s;
+  }
+  .moon:hover { transform: scale(1.05); }
+  .moon:active { transform: scale(.95); }
+  @keyframes moonGlow {
+    0% { filter: drop-shadow(0 0 20px rgba(200,180,255,.05)); }
+    100% { filter: drop-shadow(0 0 40px rgba(200,180,255,.15)); }
+  }
+
+  .pillow {
+    font-size: 3rem;
+    display: block;
+    margin-top: -.5rem;
+    opacity: .6;
+  }
+
+  .dream-box {
+    position: relative;
+    z-index: 1;
+    background: rgba(200,180,255,.02);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(200,180,255,.04);
+    border-radius: 24px;
+    padding: 2rem 1.5rem;
+    margin-bottom: 1.2rem;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all .4s;
+  }
+  .dream-box.dreaming {
+    border-color: rgba(200,180,255,.08);
+    box-shadow: 0 0 60px rgba(200,180,255,.03), inset 0 0 60px rgba(200,180,255,.01);
+  }
+  .dream-box.nightmare {
+    border-color: rgba(255,50,50,.06);
+    box-shadow: 0 0 60px rgba(255,50,50,.03);
+  }
+  .dream-box.good {
+    border-color: rgba(100,255,200,.06);
+    box-shadow: 0 0 60px rgba(100,255,200,.03);
+  }
+  .dream-box.lucid {
+    border-color: rgba(100,200,255,.08);
+    box-shadow: 0 0 80px rgba(100,200,255,.04);
+  }
+
+  .dream-icon {
+    font-size: 2.5rem;
+    margin-bottom: .8rem;
+    transition: all .5s;
+  }
+  .dream-icon.spin {
+    animation: dreamSpin 1s ease-in-out;
+  }
+  @keyframes dreamSpin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.2); }
+    100% { transform: rotate(360deg) scale(1); }
+  }
+
+  .dream-type {
+    font-size: .7rem;
+    letter-spacing: .2em;
+    color: rgba(200,180,255,.3);
+    margin-bottom: .6rem;
+  }
+  .dream-type.nightmare { color: rgba(255,50,50,.4); }
+  .dream-type.good { color: rgba(100,255,200,.4); }
+  .dream-type.lucid { color: rgba(100,200,255,.4); }
+
+  .dream-title {
+    font-size: .8rem;
+    color: rgba(200,180,255,.25);
+    margin-bottom: .8rem;
+    font-style: italic;
+  }
+
+  .dream-story {
+    color: rgba(255,255,255,.55);
+    font-size: .88rem;
+    line-height: 1.8;
+    text-align: left;
+    max-height: 280px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  .dream-story::-webkit-scrollbar { width: 3px; }
+  .dream-story::-webkit-scrollbar-thumb { background: rgba(255,255,255,.06); border-radius: 2px; }
+
+  .dream-rating {
+    margin-top: .8rem;
+    font-size: .7rem;
+    color: rgba(255,255,255,.15);
+    letter-spacing: .1em;
+  }
+
+  .placeholder-text {
+    color: rgba(255,255,255,.15);
+    font-size: .85rem;
+    line-height: 1.6;
+  }
+
+  .btn {
+    position: relative;
+    z-index: 1;
+    background: rgba(200,180,255,.04);
+    border: 1px solid rgba(200,180,255,.08);
+    color: rgba(200,180,255,.5);
+    padding: 14px 44px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all .2s;
+    touch-action: manipulation;
+    font-family: inherit;
+  }
+  .btn:hover {
+    background: rgba(200,180,255,.08);
+    border-color: rgba(200,180,255,.15);
+    color: rgba(200,180,255,.7);
+    box-shadow: 0 0 40px rgba(200,180,255,.04);
+  }
+  .btn:active { transform: scale(.96); }
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn-home {
+    border-color: rgba(255,215,0,.1);
+    color: rgba(255,215,0,.4);
+    padding: 8px 20px;
+    font-size: .8rem;
+  }
+  .btn-home:hover {
+    border-color: rgba(255,215,0,.2);
+    color: rgba(255,215,0,.6);
+  }
+  .btn-small {
+    padding: 8px 20px;
+    font-size: .8rem;
+    color: rgba(255,255,255,.3);
+    border-color: rgba(255,255,255,.04);
+  }
+  .btn-small:hover {
+    color: rgba(255,255,255,.5);
+    border-color: rgba(255,255,255,.08);
+  }
+
+  .dream-journal {
+    position: relative;
+    z-index: 1;
+    margin-top: 1.2rem;
+    max-height: 160px;
+    overflow-y: auto;
+    text-align: left;
+    padding: 0 5px;
+    scroll-behavior: smooth;
+  }
+  .dream-journal::-webkit-scrollbar { width: 3px; }
+  .dream-journal::-webkit-scrollbar-thumb { background: rgba(255,255,255,.04); border-radius: 2px; }
+  .journal-entry {
+    display: flex;
+    gap: 8px;
+    padding: 5px 0;
+    font-size: .7rem;
+    color: rgba(255,255,255,.12);
+    border-bottom: 1px solid rgba(255,255,255,.015);
+  }
+  .journal-num {
+    color: rgba(200,180,255,.2);
+    min-width: 24px;
+    flex-shrink: 0;
+  }
+  .journal-text {
+    color: rgba(255,255,255,.2);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .journal-text.bad { color: rgba(255,80,80,.2); }
+  .journal-text.good { color: rgba(100,255,180,.2); }
+  .journal-text.lucid { color: rgba(100,200,255,.25); }
+
+  .footer {
+    position: relative;
+    z-index: 1;
+    color: rgba(255,255,255,.06);
+    font-size: .6rem;
+    margin-top: 1.5rem;
+    letter-spacing: .1em;
+  }
+
+  @media (max-width: 480px) {
+    .moon { font-size: 2.8rem; }
+    .dream-box { padding: 1.5rem 1rem; }
+    .dream-story { font-size: .82rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<div class="container">
+  <h1>💤 赛博梦境</h1>
+  <div class="sub">闭上眼睛 · 进入另一个世界</div>
+
+  <div class="bed-area">
+    <span class="moon" id="moonIcon" onclick="dream()">🌙</span>
+    <span class="pillow">🛏️</span>
+  </div>
+
+  <div class="dream-box" id="dreamBox">
+    <div class="dream-icon" id="dreamIcon">💭</div>
+    <div class="placeholder-text" id="dreamText">
+      点击 🌙 月亮入睡<br>看看今晚做什么梦
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn" onclick="dream()">🌙 入睡</button>
+    <button class="btn btn-small" onclick="clearJournal()">🧹 清空梦境</button>
+    <button class="btn btn-home" onclick="location.href='index.html'">🏠 主页</button>
+  </div>
+
+  <div class="dream-journal" id="journal"></div>
+
+  <div class="footer">已经做了 <span id="dreamCount">0</span> 个梦 · 日有所思夜有所梦（并不）</div>
+</div>
+
+<script>
+// ====== 梦境组件 ======
+const dreamTypes = ['普通梦', '美梦', '噩梦', '清醒梦', '预知梦', '梦中梦', '春梦', '荒诞梦'];
+
+const dreamIcons = {
+  '普通梦': '🌫️',
+  '美梦': '✨',
+  '噩梦': '😱',
+  '清醒梦': '🧠',
+  '预知梦': '🔮',
+  '梦中梦': '🪞',
+  '春梦': '🌸',
+  '荒诞梦': '🌀',
+};
+
+const settings = [
+  '一片无边无际的云海',
+  '一条永远走不到头的走廊',
+  '小时候的小学教室，但所有人都长大了',
+  '一个全部由巧克力建成的城市',
+  '在太空里漂浮，周围是五彩的星云',
+  '一本巨大无比的书的页面上',
+  '一个到处都是镜子迷宫',
+  '沉入海底的古老城市',
+  '一条永远下着雨的旧街道',
+  '漂浮在空中的城堡',
+  '一座废弃的游乐场，旋转木马还在转',
+  '一片会变色的森林',
+  '一个只有黑白两色的世界',
+  '你的家，但所有家具都比正常大十倍',
+  '一个倒悬的城市，天空在脚下',
+  '一个巨大的火车站，但没有列车',
+  '一片开满时钟花的草原',
+  '一个漂浮在虚空中的图书馆',
+  '你的办公室，但变成了迷宫',
+  '一座漂浮在云端的日式庭院',
+];
+
+const characters = [
+  '一只会说话的猫，自称是哲学家',
+  '你小学时暗恋的那个人',
+  '一个没有脸的人，但你觉得很熟悉',
+  '你的老板，但长着一个章鱼头',
+  '一个自称是你前世的人',
+  '一只穿着西装的巨大兔子',
+  '你自己，但看起来老了五十岁',
+  '一个在路边卖奇怪药水的小贩',
+  '一群跳着诡异舞蹈的蘑菇',
+  '一个倒着走路的人',
+  '你已故的亲人，对你微笑',
+  '一个和你长得一模一样的人',
+  '一个漂浮的透明水母',
+  '三个正在下棋的骷髅',
+  '一个骑着自行车飞过的邮差',
+  '一个戴着高帽子的魔术师',
+  '你的宠物，突然开口说话了',
+  '一个背着一座山的人',
+  '月球上的嫦娥，在刷手机',
+  '一个正在织毛衣的巨大蜘蛛',
+];
+
+const events = [
+  '你突然发现自己没穿裤子',
+  '你想跑但脚像粘在地上一样',
+  '你飞起来了！越飞越高',
+  '有人在追你，但你不知道是谁',
+  '你掉进了一个无底洞',
+  '你发现了自己在做梦',
+  '你一直在下楼梯，一层又一层的',
+  '你的嘴里全是泡泡糖，说不出话',
+  '你的手机变成了一个土豆',
+  '所有的时钟都在倒着走',
+  '你大声喊叫但发不出声音',
+  '你走进一扇门，来到了完全不同的地方',
+  '你开始越变越小',
+  '你突然会了所有语言',
+  '你的影子自己动了起来',
+  '你捡到一张纸条，上面写着你的名字',
+  '天空中出现了巨大的眼睛看着你',
+  '你从高处坠落，但没有摔到地上',
+  '你的牙齿开始松动脱落',
+  '你试图打电话但永远拨不对号码',
+  '一只巨大的手从云中伸下来',
+  '你发现自己在空中游泳',
+  '整个世界突然变成了慢动作',
+  '你看到另一个自己在对面',
+  '你被困在了一个循环里，重复做着同一件事',
+];
+
+const twists = [
+  '然后你醒了，发现刚才还在梦里',
+  '但这时一只蝴蝶飞过，一切都变了',
+  '突然整个画面像镜子一样碎裂',
+  '然后你意识到——你不是在做梦，这是真的',
+  '但闹钟响了，你从梦中醒来，怅然若失',
+  '然后你开始慢慢融化……',
+  '突然，你听到了妈妈的喊声「起床了！」',
+  '但另一个你拍了拍你的肩膀说「该醒了」',
+  '然后世界开始天旋地转',
+  '你以为你醒了，但发现自己还在梦里',
+  '这时闹钟响了——但你没醒来',
+  '然后你飞向了天空，越来越远',
+  '突然画面开始倒放',
+  '你终于逃出来了，但你不想醒来',
+  '然后你感受到了前所未有的平静',
+];
+
+const outcomes = [
+  '被闹钟吵醒，怅然若失',
+  '惊醒，出了一身冷汗',
+  '自然醒来，心情莫名很好',
+  '醒来发现枕头都哭湿了',
+  '被吓醒，不敢再睡了',
+  '笑着醒来，回味无穷',
+  '醒来发现才过了十分钟',
+  '被自己的笑声吵醒了',
+  '醒来什么都不记得了',
+  '醒来特别困，仿佛没睡一样',
+  '翻了个身继续睡，续上了梦',
+  '醒来嘴角带着微笑',
+  '被窗外的一声响惊醒',
+  '醒来发现自己在梦里还在做梦（套娃）',
+  '醒来之后一整天都在想这个梦',
+];
+
+// ====== 星星背景 ======
+for (let i = 0; i < 80; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  s.style.left = Math.random() * 100 + '%';
+  s.style.top = Math.random() * 100 + '%';
+  s.style.setProperty('--d', (1 + Math.random() * 3) + 's');
+  s.style.animationDelay = Math.random() * 3 + 's';
+  s.style.width = (1 + Math.random() * 2) + 'px';
+  s.style.height = s.style.width;
+  document.getElementById('stars').appendChild(s);
+}
+
+// ====== 状态 ======
+let journal = [];
+
+// ====== 核心 ======
+function dream() {
+  const box = document.getElementById('dreamBox');
+  const icon = document.getElementById('dreamIcon');
+  const text = document.getElementById('dreamText');
+  const moon = document.getElementById('moonIcon');
+
+  // 动画
+  icon.className = 'dream-icon spin';
+  moon.style.transform = 'scale(.9)';
+  setTimeout(() => { moon.style.transform = ''; }, 300);
+  box.className = 'dream-box dreaming';
+
+  text.innerHTML = '🌙<br><br>进入梦境中……';
+
+  const delay = 500 + Math.random() * 600;
+
+  setTimeout(() => {
+    // 生成梦境
+    const type = dreamTypes[Math.floor(Math.random() * dreamTypes.length)];
+    const setting = settings[Math.floor(Math.random() * settings.length)];
+    const character = characters[Math.floor(Math.random() * characters.length)];
+    const event = events[Math.floor(Math.random() * events.length)];
+    const twist = twists[Math.floor(Math.random() * twists.length)];
+    const outcome = outcomes[Math.floor(Math.random() * outcomes.length)];
+
+    // 根据不同梦境类型调整
+    let story, boxClass, iconChar, typeClass;
+    switch (type) {
+      case '美梦':
+        story = `你来到了${setting}。那里有${character}。${event}，但一切都那么美好和温暖。${twist}。${outcome}。`;
+        boxClass = 'good';
+        iconChar = '✨';
+        typeClass = 'good';
+        break;
+      case '噩梦':
+        story = `你来到了${setting}。那里有${character}。${event}，你感到恐惧袭遍全身。${twist}。${outcome}。`;
+        boxClass = 'nightmare';
+        iconChar = '😱';
+        typeClass = 'nightmare';
+        break;
+      case '清醒梦':
+        story = `你来到了${setting}。那里有${character}。${event}。你突然意识到——这是梦！你获得了控制梦境的能力。你试着飞起来，成功了！你在这个世界里无所不能。但越清醒，梦越不稳定……${twist}。${outcome}。`;
+        boxClass = 'lucid';
+        iconChar = '🧠';
+        typeClass = 'lucid';
+        break;
+      case '预知梦':
+        story = `你来到了${setting}。那里有${character}。${event}。一切都那么真实，你感觉这不是普通的梦……${twist}。${outcome}。你醒来后总觉得这件事一定会发生。`;
+        boxClass = 'lucid';
+        iconChar = '🔮';
+        typeClass = 'lucid';
+        break;
+      case '梦中梦':
+        story = `你在${setting}里。${character}出现了。${event}。然后你醒了——但醒来后发现自己还在梦里。${twist}。${outcome}。等等，你确定你现在真的醒了吗？`;
+        boxClass = 'dreaming';
+        iconChar = '🪞';
+        typeClass = 'lucid';
+        break;
+      case '春梦':
+        story = `你在${setting}。那里有${character}。氛围有点暧昧……${event}。但事情的发展和你想象的不太一样。${twist}。${outcome}。醒来有点脸红。`;
+        boxClass = 'good';
+        iconChar = '🌸';
+        typeClass = 'good';
+        break;
+      case '荒诞梦':
+        story = `你来到了${setting}。${character}也在那里。然后${event}。但这还没完——${twist}。最后：${outcome}。这个梦实在太离谱了，你醒来笑了半天。`;
+        boxClass = 'dreaming';
+        iconChar = '🌀';
+        typeClass = '';
+        break;
+      default:
+        story = `你来到了${setting}。${character}出现在你面前。${event}。${twist}。${outcome}。就是一个普通的梦，没什么特别。`;
+        boxClass = 'dreaming';
+        iconChar = '🌫️';
+        typeClass = '';
+    }
+
+    box.className = 'dream-box ' + boxClass;
+    const iconFinal = dreamIcons[type] || iconChar;
+    icon.textContent = iconFinal;
+    icon.className = 'dream-icon';
+
+    const dreamTitle = randomTitle();
+
+    text.innerHTML = `
+      <div class="dream-type ${typeClass}">${type}</div>
+      <div class="dream-title">《${dreamTitle}》</div>
+      <div class="dream-story">${story}</div>
+      <div class="dream-rating">💤 ${outcome}</div>
+    `;
+
+    // 记录
+    const entry = `${type}：${dreamTitle}`;
+    journal.push({ type, text: entry });
+    renderJournal();
+    document.getElementById('dreamCount').textContent = journal.length;
+  }, delay);
+}
+
+function randomTitle() {
+  const prefixes = ['无尽', '迷幻', '奇异', '虚妄', '缥缈', '幻彩', '交错', '碎镜',
+                     '浮生', '轮回', '失重', '绯红', '琉璃', '琥珀', '蜃楼', '极光'];
+  const suffixes = ['梦境', '之梦', '幻境', '一梦', '梦呓', '迷梦', '梦乡', '幻想',
+                     '空间', '世界', '之旅', '奇谭', '物语', '漫游', '彼岸', '桃源'];
+  return prefixes[Math.floor(Math.random() * prefixes.length)]
+       + suffixes[Math.floor(Math.random() * suffixes.length)];
+}
+
+function renderJournal() {
+  const el = document.getElementById('journal');
+  el.innerHTML = journal.slice(-15).reverse().map((j, i) => {
+    let cls = 'journal-text';
+    if (j.type === '噩梦') cls += ' bad';
+    else if (j.type === '美梦' || j.type === '春梦') cls += ' good';
+    else if (j.type === '清醒梦' || j.type === '预知梦' || j.type === '梦中梦') cls += ' lucid';
+    return `<div class="journal-entry">
+      <span class="journal-num">#${journal.length - i}</span>
+      <span class="${cls}">${j.text}</span>
+    </div>`;
+  }).join('');
+}
+
+function clearJournal() {
+  journal = [];
+  document.getElementById('journal').innerHTML = '';
+  document.getElementById('dreamCount').textContent = '0';
+  const box = document.getElementById('dreamBox');
+  const icon = document.getElementById('dreamIcon');
+  const text = document.getElementById('dreamText');
+  box.className = 'dream-box';
+  icon.textContent = '💭';
+  text.innerHTML = '点击 🌙 月亮入睡<br>看看今晚做什么梦';
+}
+
+// ====== 键盘 ======
+document.addEventListener('keydown', e => {
+  if (e.key === ' ') { e.preventDefault(); dream(); }
+});
+
+// ====== 初始化 ======
+</script>
+</body>
+</html>

@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>赛博魔镜 · 问你所想</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100svh;
+    background: linear-gradient(135deg, #0a0a14, #1a0a2e, #0d1117);
+    font-family: system-ui, 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    touch-action: manipulation;
+    overflow: hidden;
+  }
+  .container {
+    text-align: center;
+    max-width: 460px;
+    width: 100%;
+  }
+  h1 {
+    color: rgba(255,255,255,.7);
+    font-size: 1.3rem;
+    font-weight: 300;
+    letter-spacing: .25em;
+    margin-bottom: .3rem;
+  }
+  .sub {
+    color: rgba(255,255,255,.25);
+    font-size: .75rem;
+    margin-bottom: 2rem;
+  }
+
+  .mirror-frame {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    margin: 0 auto 2rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(200,180,255,.04));
+    border: 2px solid rgba(255,255,255,.06);
+    box-shadow:
+      0 0 60px rgba(200,180,255,.04),
+      inset 0 0 80px rgba(200,180,255,.02),
+      0 0 120px rgba(100,80,200,.03);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all .4s cubic-bezier(.34,1.56,.64,1);
+    user-select: none;
+  }
+  .mirror-frame::before {
+    content: '';
+    position: absolute;
+    top: -3px; left: -3px; right: -3px; bottom: -3px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg,
+      rgba(200,180,255,0),
+      rgba(200,180,255,.05),
+      rgba(255,215,0,.05),
+      rgba(200,180,255,0)
+    );
+    z-index: -1;
+    animation: mirrorGlow 6s linear infinite;
+  }
+  @keyframes mirrorGlow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  .mirror-frame:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 80px rgba(200,180,255,.06), inset 0 0 100px rgba(200,180,255,.03);
+  }
+
+  .mirror-inner {
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, rgba(20,15,40,.9), rgba(5,5,15,.95));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    transition: all .5s;
+    position: relative;
+    overflow: hidden;
+  }
+  .mirror-inner.fog {
+    background: radial-gradient(circle at 50% 50%, rgba(50,40,80,.6), rgba(10,8,25,.8));
+  }
+  .mirror-inner.fog::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(circle at 30% 40%, rgba(255,255,255,.03) 0%, transparent 40%),
+      radial-gradient(circle at 70% 60%, rgba(255,255,255,.02) 0%, transparent 35%),
+      radial-gradient(circle at 45% 55%, rgba(255,255,255,.02) 0%, transparent 30%);
+    pointer-events: none;
+    animation: fogSwirl 4s ease-in-out infinite alternate;
+  }
+  @keyframes fogSwirl {
+    0% { opacity: .3; transform: scale(1); }
+    100% { opacity: .7; transform: scale(1.1); }
+  }
+
+  .mirror-inner.twinkle::before {
+    content: '✨';
+    position: absolute;
+    top: 30px;
+    right: 35px;
+    font-size: 1.2rem;
+    animation: twinkle 1.5s ease-in-out infinite alternate;
+  }
+  .mirror-inner.twinkle::after {
+    content: '✨';
+    position: absolute;
+    bottom: 35px;
+    left: 30px;
+    font-size: .9rem;
+    animation: twinkle 2s ease-in-out infinite alternate-reverse;
+  }
+  @keyframes twinkle {
+    0% { opacity: .2; transform: scale(.8); }
+    100% { opacity: 1; transform: scale(1.2); }
+  }
+
+  .mirror-text {
+    color: rgba(255,255,255,.15);
+    font-size: .8rem;
+    line-height: 1.6;
+    transition: all .5s;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+  .mirror-text.placeholder {
+    color: rgba(255,255,255,.12);
+    font-style: italic;
+  }
+  .mirror-text.answer {
+    color: rgba(200,180,255,.7);
+    font-size: 1rem;
+    font-weight: 500;
+    text-shadow: 0 0 20px rgba(200,180,255,.1);
+  }
+  .mirror-text.answer.yes { color: rgba(100,255,180,.7); text-shadow: 0 0 20px rgba(100,255,180,.1); }
+  .mirror-text.answer.no { color: rgba(255,100,100,.7); text-shadow: 0 0 20px rgba(255,100,100,.1); }
+  .mirror-text.answer.sassy { color: rgba(255,200,100,.7); text-shadow: 0 0 20px rgba(255,200,100,.1); }
+  .mirror-text.answer.mystic { color: rgba(180,150,255,.8); text-shadow: 0 0 30px rgba(180,150,255,.15); }
+  .mirror-text.answer.deep { color: rgba(100,200,255,.7); text-shadow: 0 0 20px rgba(100,200,255,.1); }
+  .mirror-text.answer.burn { color: rgba(255,150,50,.7); text-shadow: 0 0 20px rgba(255,150,50,.1); }
+
+  .question-area {
+    margin-bottom: 1.5rem;
+  }
+  .question-input {
+    width: 100%;
+    max-width: 380px;
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 30px;
+    padding: 14px 24px;
+    font-size: .95rem;
+    color: rgba(255,255,255,.6);
+    font-family: inherit;
+    outline: none;
+    transition: all .2s;
+    text-align: center;
+  }
+  .question-input::placeholder {
+    color: rgba(255,255,255,.15);
+    text-align: center;
+  }
+  .question-input:focus {
+    border-color: rgba(200,180,255,.2);
+    background: rgba(255,255,255,.05);
+    box-shadow: 0 0 30px rgba(200,180,255,.03);
+  }
+
+  .btn {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1);
+    color: rgba(255,255,255,.7);
+    padding: 12px 40px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: .95rem;
+    transition: all .2s;
+    touch-action: manipulation;
+    font-family: inherit;
+  }
+  .btn:hover {
+    background: rgba(200,180,255,.08);
+    border-color: rgba(200,180,255,.2);
+    color: rgba(200,180,255,.8);
+    box-shadow: 0 0 40px rgba(200,180,255,.04);
+  }
+  .btn:active { transform: scale(.96); }
+  .btn-primary {
+    background: rgba(200,180,255,.06);
+    border-color: rgba(200,180,255,.12);
+    color: rgba(200,180,255,.6);
+    font-size: 1rem;
+    padding: 14px 50px;
+  }
+  .btn-primary:hover {
+    background: rgba(200,180,255,.1);
+    border-color: rgba(200,180,255,.2);
+    color: rgba(200,180,255,.8);
+    box-shadow: 0 0 50px rgba(200,180,255,.06);
+  }
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: .8rem;
+  }
+  .btn-small {
+    padding: 8px 20px;
+    font-size: .8rem;
+    color: rgba(255,255,255,.4);
+    border-color: rgba(255,255,255,.05);
+  }
+  .btn-small:hover {
+    color: rgba(255,255,255,.6);
+    border-color: rgba(255,255,255,.1);
+  }
+  .btn-home {
+    border-color: rgba(255,215,0,.15);
+    color: rgba(255,215,0,.5);
+  }
+  .btn-home:hover {
+    color: rgba(255,215,0,.7);
+  }
+
+  .history {
+    margin-top: 1.2rem;
+    max-height: 140px;
+    overflow-y: auto;
+    text-align: left;
+    padding: 0 10px;
+    scroll-behavior: smooth;
+  }
+  .history::-webkit-scrollbar { width: 3px; }
+  .history::-webkit-scrollbar-thumb { background: rgba(255,255,255,.06); border-radius: 2px; }
+  .history-item {
+    display: flex;
+    gap: 8px;
+    padding: 5px 0;
+    font-size: .75rem;
+    color: rgba(255,255,255,.2);
+    border-bottom: 1px solid rgba(255,255,255,.02);
+  }
+  .history-q {
+    color: rgba(255,255,255,.25);
+    flex-shrink: 0;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .history-a {
+    color: rgba(200,180,255,.3);
+  }
+
+  .footer {
+    color: rgba(255,255,255,.08);
+    font-size: .65rem;
+    margin-top: 1.5rem;
+    letter-spacing: .1em;
+  }
+
+  @media (max-width: 480px) {
+    .mirror-frame { width: 240px; height: 240px; }
+    .mirror-inner { width: 210px; height: 210px; }
+    .mirror-text.answer { font-size: .85rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🪞 赛博魔镜</h1>
+  <div class="sub">魔镜魔镜告诉我 · 这个世界最——不靠谱的答案</div>
+
+  <div class="mirror-frame" id="mirrorFrame" onclick="askMirror()">
+    <div class="mirror-inner twinkle" id="mirrorInner">
+      <div class="mirror-text placeholder" id="mirrorText">🪞<br><br>在心中默念你的问题<br>然后点击魔镜</div>
+    </div>
+  </div>
+
+  <div class="question-area">
+    <input class="question-input" id="questionInput"
+      placeholder="输入你的问题……比如：明天会涨薪吗？"
+      maxlength="60"
+      onkeydown="if(event.key==='Enter')askMirror()"
+      autocomplete="off">
+  </div>
+
+  <button class="btn btn-primary" onclick="askMirror()">🔮 问魔镜</button>
+
+  <div class="history" id="history"></div>
+
+  <div class="btn-row">
+    <button class="btn btn-small" onclick="clearHistory()">🧹 清空记录</button>
+    <button class="btn btn-small btn-home" onclick="location.href='index.html'">🏠 主页</button>
+  </div>
+
+  <div class="footer">已经问了 <span id="askCount">0</span> 次 · 魔镜从不撒谎，只是嘴很毒</div>
+</div>
+
+<script>
+// ====== 答案库 ======
+const answers = {
+  yes: [
+    '魔镜说：必成。准备好迎接吧。',
+    '稳了。比太阳明天会升起还稳。',
+    '魔镜露出了神秘的微笑……答案是肯定的。',
+    '百分之百。除非你今天没洗脸。',
+    '是的，而且结果会比你想的更好。',
+    '天时地利人和，不成都难。',
+    '魔镜闪烁了三下，表示赞同。',
+    '这件事如果不成都对不起你的期待。',
+    '放心，宇宙站在你这边。',
+    '魔镜掐指一算——行。',
+    '冲冲冲，这波稳如老狗。',
+    '是的，但别高兴太早，魔镜有保留意见。',
+  ],
+  no: [
+    '魔镜缓缓摇头……不太行。',
+    '别想了，洗洗睡吧。',
+    '答案是否定的。下一个问题。',
+    '概率约等于你中彩票头奖。',
+    '魔镜连闪烁都懒得闪了。不行。',
+    '这件事如果成了，魔镜当场吃掉。',
+    '不如你把期待值调低一点？',
+    '不好的消息：没戏。更不好的消息：真没戏。',
+    '魔镜建议你换个目标。',
+    '你心里已经有答案了，只是不想承认——不行。',
+    '达咩。',
+    '老天爷今天不上班，这事办不了。',
+  ],
+  sassy: [
+    '你确定你想知道答案？……行吧，别后悔。',
+    '魔镜觉得你应该先把手头的事做完。',
+    '这个问题不值得问。下一个。',
+    '你是认真的吗？……行吧，魔镜勉为其难回答你。',
+    '魔镜翻了个白眼。但还是回答了：也许吧。',
+    '这个问题再问我就要收钱了。',
+    '你上个问题问过了。哦没问过？那你自己猜。',
+    '魔镜累了，今天不想营业。算了还是回答你吧。',
+    '把这个问题换成「我是不是该去睡觉」可能更好。',
+    '这问题问得很有水平——水平很低的那种。',
+  ],
+  mystic: [
+    '宇宙的尘埃尚未落定，时机未到。',
+    '魔镜中雾气翻涌……答案在风中飘。',
+    '星辰显示，此事需待月圆之夜方见分晓。',
+    '你的命运线与另一条线正在交织，等待片刻。',
+    '魔镜看到了模糊的影像……不确定，再问问？',
+    '答案在你自己心里，魔镜只是帮你确认一下。',
+    '时间和空间都在重组，这个问题暂时无解。',
+    '魔镜显示：此事在平行宇宙中已经成了。',
+    '命运的齿轮正在转动，但卡住了。',
+    '高级机密，权限不足，无法查看。',
+  ],
+  deep: [
+    '你有没有想过，这个问题本身才是答案？',
+    '重要的事从来不在答案里，而在问题中。',
+    '你问错人了。不对，你问错镜子了。',
+    '如果我说是，你会信吗？如果你不信，问来干嘛。',
+    '魔镜反问你：你觉得呢？',
+    '人生的意义不在于得到答案，在于……算了编不下去了。',
+    '这个问题让魔镜陷入了沉思。然后它决定不想了。',
+    '哲♂学的问题，需要哲♂学的答案。不行。',
+    '也许你该先问问自己，为什么要问这个问题。',
+    '魔镜检测到你的焦虑指数偏高，建议深呼吸。',
+  ],
+  burn: [
+    '魔镜看着你，沉默了……你确定要听真话？',
+    '不是魔镜不想回答，是怕伤你自尊。',
+    '你人挺好的，就是问题问得不太好。',
+    '魔镜说：下一个问题。这个算了。',
+    '你要不先去照照普通的镜子？',
+    '魔镜委婉地表示：和你关系不大。',
+    '魔镜笑了一下，没有回答。你自己体会。',
+    '你是电你是光你是唯一的神话——好了骗你的。',
+    '真话还是假话？真话伤人心，假话伤心。你选。',
+    '魔镜觉得你最近想太多了。去戳泡泡吧。',
+  ],
+};
+
+// ====== 状态 ======
+let history = [];
+let isAnimating = false;
+
+// ====== 核心逻辑 ======
+function askMirror() {
+  if (isAnimating) return;
+  const input = document.getElementById('questionInput');
+  let q = input.value.trim();
+  if (!q) {
+    // 随机给个默认问题
+    const defaults = [
+      '明天会更好吗？', '我今年能发财吗？', 'ta喜欢我吗？',
+      '该不该辞职？', '世界上有外星人吗？', '我能瘦下来吗？',
+      '魔镜你是不是在骗我？', '今天中午吃什么？',
+    ];
+    q = defaults[Math.floor(Math.random() * defaults.length)];
+    input.value = q;
+  }
+
+  isAnimating = true;
+
+  const inner = document.getElementById('mirrorInner');
+  const text = document.getElementById('mirrorText');
+  const frame = document.getElementById('mirrorFrame');
+
+  // 雾化动画
+  inner.classList.add('fog');
+  inner.classList.remove('twinkle');
+  text.className = 'mirror-text placeholder';
+  text.textContent = '🔮\n\n魔镜正在思考……\n请稍候';
+
+  // 震动
+  frame.style.transform = 'scale(.98)';
+  setTimeout(() => { frame.style.transform = 'scale(1.02)'; }, 80);
+  setTimeout(() => { frame.style.transform = 'scale(1)'; }, 160);
+
+  // 随机延迟后出答案
+  const delay = 600 + Math.random() * 800;
+
+  setTimeout(() => {
+    // 选答案分类
+    const roll = Math.random();
+    let pool;
+    if (roll < 0.25) pool = answers.yes;
+    else if (roll < 0.50) pool = answers.no;
+    else if (roll < 0.65) pool = answers.sassy;
+    else if (roll < 0.78) pool = answers.mystic;
+    else if (roll < 0.89) pool = answers.deep;
+    else pool = answers.burn;
+
+    const ans = pool[Math.floor(Math.random() * pool.length)];
+
+    // 风格标签
+    let style = 'answer';
+    if (pool === answers.yes) style += ' yes';
+    else if (pool === answers.no) style += ' no';
+    else if (pool === answers.sassy) style += ' sassy';
+    else if (pool === answers.mystic) style += ' mystic';
+    else if (pool === answers.deep) style += ' deep';
+    else if (pool === answers.burn) style += ' burn';
+
+    text.className = 'mirror-text ' + style;
+    text.textContent = ans;
+
+    inner.classList.remove('fog');
+
+    // 闪一下
+    frame.style.boxShadow = '0 0 80px rgba(200,180,255,.12), inset 0 0 100px rgba(200,180,255,.04)';
+    setTimeout(() => {
+      frame.style.boxShadow = '';
+    }, 500);
+
+    setTimeout(() => {
+      inner.classList.add('twinkle');
+    }, 300);
+
+    // 记录历史
+    history.push({ q, a: ans });
+    renderHistory();
+    document.getElementById('askCount').textContent = history.length;
+
+    isAnimating = false;
+  }, delay);
+}
+
+function renderHistory() {
+  const el = document.getElementById('history');
+  el.innerHTML = history.slice(-10).reverse().map(h =>
+    `<div class="history-item">
+      <span class="history-q">Q: ${h.q}</span>
+      <span class="history-a">→ ${h.a}</span>
+    </div>`
+  ).join('');
+  setTimeout(() => { el.scrollTop = 0; }, 50);
+}
+
+function clearHistory() {
+  history = [];
+  document.getElementById('history').innerHTML = '';
+  document.getElementById('askCount').textContent = '0';
+  const text = document.getElementById('mirrorText');
+  text.className = 'mirror-text placeholder';
+  text.textContent = '🪞\n\n在心中默念你的问题\n然后点击魔镜';
+  document.getElementById('mirrorInner').classList.add('twinkle');
+  document.getElementById('mirrorInner').classList.remove('fog');
+  document.getElementById('questionInput').value = '';
+}
+
+// ====== 键盘 ======
+document.addEventListener('keydown', e => {
+  if (e.key === ' ') {
+    e.preventDefault();
+    askMirror();
+  }
+});
+
+// ====== 初始化 ======
+</script>
+</body>
+</html>

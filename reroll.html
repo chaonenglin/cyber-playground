@@ -17,7 +17,7 @@
   }
   .container {
     text-align: center;
-    max-width: 480px;
+    max-width: 520px;
     width: 100%;
   }
   h1 {
@@ -40,14 +40,15 @@
     border-radius: 24px;
     padding: 2rem;
     margin-bottom: 1.5rem;
+    transition: opacity .4s, transform .4s;
   }
 
   .avatar-area {
-    margin-bottom: 1.5rem;
+    margin-bottom: .8rem;
     position: relative;
   }
   .avatar {
-    font-size: 5rem;
+    font-size: 4.5rem;
     display: block;
     line-height: 1;
     transition: transform .3s;
@@ -64,45 +65,52 @@
   }
 
   .name {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: rgba(255,255,255,.85);
-    margin-bottom: 4px;
+    margin-bottom: 2px;
   }
   .title-line {
-    color: rgba(255,255,255,.4);
-    font-size: .85rem;
-    margin-bottom: 1rem;
+    color: rgba(255,255,255,.35);
+    font-size: .8rem;
+    margin-bottom: .6rem;
+  }
+
+  .age-display {
+    font-size: 2rem;
+    font-weight: 300;
+    color: rgba(255,215,0,.7);
+    letter-spacing: .1em;
+    margin-bottom: .8rem;
   }
 
   .stats {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 1rem;
+    gap: 8px;
+    margin-bottom: .8rem;
   }
   .stat {
     background: rgba(255,255,255,.04);
-    border-radius: 14px;
-    padding: 12px;
+    border-radius: 12px;
+    padding: 10px;
     text-align: center;
   }
   .stat-label {
     color: rgba(255,255,255,.3);
-    font-size: .65rem;
+    font-size: .6rem;
     letter-spacing: .1em;
-    text-transform: uppercase;
   }
   .stat-value {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 700;
     margin-top: 2px;
   }
   .stat-bar {
-    height: 4px;
+    height: 3px;
     background: rgba(255,255,255,.06);
     border-radius: 2px;
-    margin-top: 6px;
+    margin-top: 5px;
     overflow: hidden;
   }
   .stat-bar-fill {
@@ -111,246 +119,725 @@
     transition: width .6s ease;
   }
 
-  .traits {
+  .event-box {
+    background: rgba(255,255,255,.03);
+    border-radius: 14px;
+    padding: 14px;
+    margin: .6rem 0 .2rem;
+    min-height: 3.6em;
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+    align-items: center;
     justify-content: center;
-    margin-bottom: 1rem;
+    border-left: 3px solid rgba(255,255,255,.08);
+    transition: border-color .3s;
   }
-  .trait {
-    font-size: .7rem;
-    padding: 4px 12px;
-    border-radius: 20px;
-    background: rgba(255,255,255,.05);
-    border: 1px solid rgba(255,255,255,.08);
+  .event-box.good { border-left-color: #69db7c; }
+  .event-box.bad { border-left-color: #ff6b6b; }
+  .event-box.neutral { border-left-color: rgba(255,255,255,.2); }
+  .event-box.death { border-left-color: #ffd700; }
+  .event-text {
     color: rgba(255,255,255,.6);
-  }
-  .trait.gold { background: rgba(255,215,0,.1); border-color: rgba(255,215,0,.2); color: #ffd700; }
-  .trait.red { background: rgba(255,50,50,.08); border-color: rgba(255,50,50,.15); color: #ff6b6b; }
-
-  .bio {
-    color: rgba(255,255,255,.5);
     font-size: .85rem;
-    line-height: 1.6;
-    padding: 1rem 0;
-    border-top: 1px solid rgba(255,255,255,.04);
-    margin-top: .5rem;
-    min-height: 3.2em;
+    line-height: 1.5;
+  }
+  .event-text .age-tag {
+    color: rgba(255,215,0,.5);
+    font-size: .7rem;
+    margin-right: 6px;
+  }
+  .event-effects {
+    font-size: .7rem;
+    margin-top: 6px;
+    color: rgba(255,255,255,.35);
+  }
+  .event-effects .up { color: #69db7c; }
+  .event-effects .down { color: #ff6b6b; }
+
+  .timeline {
+    display: none;
+    max-height: 320px;
+    overflow-y: auto;
+    text-align: left;
+    margin: .8rem 0 .2rem;
+    padding-right: 4px;
+    scroll-behavior: smooth;
+  }
+  .timeline.show { display: block; }
+  .timeline::-webkit-scrollbar { width: 4px; }
+  .timeline::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
+
+  .tl-entry {
+    display: flex;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,.03);
+    font-size: .78rem;
+    line-height: 1.4;
+  }
+  .tl-age {
+    color: rgba(255,215,0,.4);
+    min-width: 32px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .tl-text {
+    color: rgba(255,255,255,.55);
+  }
+  .tl-entry.death .tl-text { color: #ffd700; font-weight: 600; }
+
+  .death-summary {
+    display: none;
+    margin-top: .4rem;
+  }
+  .death-summary.show { display: block; }
+  .death-title {
+    font-size: 1.1rem;
+    color: #ffd700;
+    margin-bottom: 4px;
+  }
+  .death-age {
+    font-size: .8rem;
+    color: rgba(255,255,255,.3);
+    margin-bottom: .6rem;
+  }
+  .death-cause {
+    font-size: .9rem;
+    color: rgba(255,255,255,.5);
+    padding: 10px;
+    background: rgba(255,215,0,.04);
+    border-radius: 12px;
+    border: 1px solid rgba(255,215,0,.1);
+    margin-bottom: .8rem;
   }
 
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
   .btn {
     background: rgba(255,255,255,.06);
     border: 1px solid rgba(255,255,255,.1);
     color: rgba(255,255,255,.7);
-    padding: 12px 40px;
+    padding: 12px 28px;
     border-radius: 30px;
     cursor: pointer;
-    font-size: .95rem;
+    font-size: .9rem;
     transition: all .2s;
     touch-action: manipulation;
+    font-family: inherit;
   }
   .btn:hover {
     background: rgba(255,200,100,.1);
     border-color: rgba(255,200,100,.2);
     color: #ffd700;
   }
+  .btn:active { transform: scale(.96); }
   .btn-primary {
     background: rgba(255,200,100,.1);
     border-color: rgba(255,200,100,.2);
     color: #ffd700;
-    font-size: 1.1rem;
-    padding: 14px 48px;
+    font-size: 1rem;
+    padding: 12px 40px;
   }
   .btn-primary:hover {
     background: rgba(255,200,100,.18);
     box-shadow: 0 0 40px rgba(255,215,0,.08);
   }
-  .btn:active { transform: scale(.96); }
+  .btn-next {
+    color: #69db7c;
+    border-color: rgba(105,219,124,.15);
+  }
+  .btn-next:hover {
+    background: rgba(105,219,124,.1);
+    border-color: rgba(105,219,124,.25);
+    color: #69db7c;
+  }
+  .btn-dead { display: none; }
+  .btn-home {
+    border-color: rgba(255,215,0,.15);
+    color: rgba(255,215,0,.6);
+    font-size: .8rem;
+    padding: 8px 20px;
+  }
 
-  .footer { color: rgba(255,255,255,.12); font-size: .7rem; margin-top: 1rem; }
+  .footer {
+    color: rgba(255,255,255,.12);
+    font-size: .7rem;
+    margin-top: 1rem;
+  }
+  @media (max-width: 480px) {
+    .card { padding: 1.2rem; }
+    .stats { gap: 6px; }
+    .stat { padding: 8px; }
+    .stat-value { font-size: 1rem; }
+    .avatar { font-size: 3.5rem; }
+    .age-display { font-size: 1.5rem; }
+  }
 </style>
 </head>
 <body>
 
 <div class="container">
   <h1>🌀 人生重开模拟器</h1>
-  <div class="subtitle">不满意这辈子？再开一局</div>
+  <div class="subtitle">点击开始 · 每年一遇 · 终有尽头</div>
 
   <div class="card" id="card">
     <div class="avatar-area">
       <span class="avatar" id="avatar">👶</span>
     </div>
-    <div class="name" id="name">加载中...</div>
-    <div class="title-line" id="titleLine">——</div>
+    <div><span class="name" id="name">等待开始</span> <span id="genderBadge" style="font-size:.85rem;color:rgba(255,255,255,.3);margin-left:6px"></span></div>
+    <div class="title-line" id="titleLine">点击下方按钮开启新人生</div>
+
+    <div class="age-display" id="ageDisplay">—</div>
 
     <div class="stats" id="stats">
       <div class="stat">
         <div class="stat-label">🧠 智商</div>
-        <div class="stat-value" id="iq">0</div>
+        <div class="stat-value" id="iq">—</div>
         <div class="stat-bar"><div class="stat-bar-fill" id="iqBar" style="width:0%"></div></div>
       </div>
       <div class="stat">
         <div class="stat-label">💰 财运</div>
-        <div class="stat-value" id="wealth">0</div>
+        <div class="stat-value" id="wealth">—</div>
         <div class="stat-bar"><div class="stat-bar-fill" id="wealthBar" style="width:0%"></div></div>
       </div>
       <div class="stat">
         <div class="stat-label">❤️ 颜值</div>
-        <div class="stat-value" id="looks">0</div>
+        <div class="stat-value" id="looks">—</div>
         <div class="stat-bar"><div class="stat-bar-fill" id="looksBar" style="width:0%"></div></div>
       </div>
       <div class="stat">
         <div class="stat-label">🍀 运气</div>
-        <div class="stat-value" id="luck">0</div>
+        <div class="stat-value" id="luck">—</div>
         <div class="stat-bar"><div class="stat-bar-fill" id="luckBar" style="width:0%"></div></div>
       </div>
     </div>
 
-    <div class="traits" id="traits"></div>
-    <div class="bio" id="bio">点击「重开人生」开始新的一局</div>
+    <div class="event-box" id="eventBox">
+      <div class="event-text" id="eventText">点击「重开人生」开始新的一局</div>
+    </div>
+
+    <!-- 时间线（死后展示） -->
+    <div class="timeline" id="timeline"></div>
+
+    <!-- 死亡总结 -->
+    <div class="death-summary" id="deathSummary">
+      <div class="death-title">💀 一生落幕</div>
+      <div class="death-age" id="deathAge"></div>
+      <div class="death-cause" id="deathCause"></div>
+    </div>
   </div>
 
-  <button class="btn btn-primary" onclick="reroll()">🔄 重开人生</button>
-  <div class="footer">每次随机生成 · 已经活了 <span id="lives">0</span> 辈子</div>
+  <div class="btn-row" id="btnRow">
+    <button class="btn btn-primary" onclick="startLife()">🔄 重开人生</button>
+    <button class="btn btn-next btn-dead" id="btnNext" onclick="nextYear()">下一年 ▶</button>
+    <button class="btn btn-home btn-dead" id="btnHome" onclick="location.href='index.html'">🏠 主页</button>
+  </div>
+
+  <div class="footer">已经活了 <span id="lives">0</span> 辈子</div>
 </div>
 
 <script>
+// ====== 基础数据 ======
 const firstNames = [
   '小明','小红','小刚','阿花','大壮','翠花','狗蛋','铁柱',
   '建国','建军','国庆','跃进','淑芬','丽珍','秀英','志强',
   '子轩','紫萱','浩然','诗涵','沐辰','若曦','星辰','雨桐',
 ];
-
 const lastNames = [
   '王','李','张','刘','陈','杨','黄','赵','周','吴','徐','孙',
   '马','朱','胡','林','郭','何','高','罗','欧阳','慕容','令狐',
 ];
-
-const avatars = ['👶','🧒','👦','👧','🧑','👨','👩','🧔','👴','👵',
-                 '🤴','👸','🦸','🧙','🧚','🧛','🤖','👽','🎅','🧝'];
-
 const statColors = ['#ff6b6b','#ffa94d','#ffd43b','#69db7c','#63e6be'];
 
-function randomName() {
-  return lastNames[Math.floor(Math.random()*lastNames.length)]
-       + firstNames[Math.floor(Math.random()*firstNames.length)];
-}
+// ====== 事件池（按年龄段） ======
+const eventPools = {
+  infant: [ // 1-3岁 — 20个事件
+    { text: '在医院的啼哭中来到了这个世界', e: { iq: 2, luck: 3 }, mood: 'good' },
+    { text: '学会了走路，虽然摔了不少跟头', e: { iq: 4, luck: -1 }, mood: 'neutral' },
+    { text: '开口叫了第一声「妈妈」', e: { iq: 5, luck: 3 }, mood: 'good' },
+    { text: '生了一场大病，全家都急坏了', e: { iq: 2, luck: -8 }, mood: 'bad' },
+    { text: '在公园里和别的小朋友玩了泥巴', e: { luck: 4, looks: -2 }, mood: 'neutral' },
+    { text: '被家里的猫抓了一下，哇哇大哭', e: { looks: -2, luck: -2 }, mood: 'bad' },
+    { text: '第一天去幼儿园，哭得惊天动地', e: { iq: 3, luck: -3 }, mood: 'bad' },
+    { text: '在幼儿园交到了第一个好朋友', e: { luck: 6, looks: 3 }, mood: 'good' },
+    { text: '画画被老师贴在了墙上展示', e: { iq: 4, looks: 3 }, mood: 'good' },
+    { text: '生日收到了很多礼物，开心极了', e: { luck: 5, looks: 2 }, mood: 'good' },
+    { text: '偷偷把爸爸的剃须膏挤了一地', e: { iq: 2, luck: -4 }, mood: 'bad' },
+    { text: '在浴缸里学会了用脚打水花', e: { luck: 3, iq: 2 }, mood: 'good' },
+    { text: '把一个拖鞋当成了宠物养了好几天', e: { iq: -3, luck: 3 }, mood: 'neutral' },
+    { text: '半夜不睡觉非要学狼叫', e: { iq: 1, luck: -3, looks: -2 }, mood: 'bad' },
+    { text: '趁大人不注意啃了一口仙人掌', e: { iq: -4, looks: -3, luck: -5 }, mood: 'bad' },
+    { text: '第一次看见大海，震惊得说不出话', e: { iq: 4, luck: 5 }, mood: 'good' },
+    { text: '被舅舅举高高然后吓哭了', e: { luck: -2, looks: -2 }, mood: 'bad' },
+    { text: '把妈妈的化妆品涂满了整张脸', e: { looks: -5, iq: 1, luck: -2 }, mood: 'bad' },
+    { text: '在商场里走丢了五分钟，全家吓疯', e: { iq: 2, luck: -6 }, mood: 'bad' },
+    { text: '吃了人生第一口冰淇淋，幸福到飞起', e: { luck: 6, looks: 2 }, mood: 'good' },
+    { text: '在小小的花园里面挖呀挖呀挖，种小小的种子开小小的花', e: { iq: 3, luck: 3 }, mood: 'good' },
+    { text: '半夜突然惊醒，发现自己在婴儿床上，又安心睡了', e: { luck: 2 }, mood: 'neutral' },
+    { text: '被爸妈亲了一口，嫌弃地擦了擦脸', e: { looks: 2, luck: -1 }, mood: 'neutral' },
+    { text: '哭了半天发现没人理，自己停了', e: { iq: 3, luck: -2 }, mood: 'neutral' },
+    { text: '突然学会了假哭骗抱抱', e: { iq: 4, looks: -2, luck: 2 }, mood: 'neutral' },
+    { text: '睡觉不老实从床上滚下来了，哇哇大哭', e: { looks: -3, luck: -4 }, mood: 'bad' },
+    { text: '【致命】婴儿猝死综合征，在睡梦中安静地离开了', e: {}, mood: 'bad', deathMsg: '婴儿猝死综合征，还没来得及看看这个世界' },
+  ],
+  child: [ // 4-6岁 — 28个事件
+    { text: '上幼儿园中班，已经不那么害怕了', e: { iq: 3, luck: 2 }, mood: 'neutral' },
+    { text: '学会了骑带辅助轮的小自行车', e: { iq: 4, luck: 3 }, mood: 'good' },
+    { text: '在幼儿园文艺表演上唱歌', e: { looks: 4, iq: 3 }, mood: 'good' },
+    { text: '被大孩子抢了玩具，哭着找老师', e: { luck: -3, looks: -2 }, mood: 'bad' },
+    { text: '第一次去动物园，眼睛都不够用了', e: { iq: 5, luck: 3 }, mood: 'good' },
+    { text: '摔倒了磕破了膝盖', e: { looks: -3, luck: -2 }, mood: 'bad' },
+    { text: '学会了写自己的名字', e: { iq: 5, luck: 2 }, mood: 'good' },
+    { text: '妈妈给买了新衣服，臭美了一整天', e: { looks: 4, luck: 2 }, mood: 'good' },
+    { text: '和邻居家的小朋友吵架了', e: { luck: -2, iq: -1 }, mood: 'bad' },
+    { text: '听爷爷讲了很多有趣的故事', e: { iq: 5, luck: 3 }, mood: 'good' },
+    { text: '坚信床底下有怪物，不敢关灯睡觉', e: { iq: 2, luck: -3 }, mood: 'bad' },
+    { text: '问妈妈「我是从哪里来的」，得到了一个含糊的回答', e: { iq: 3, luck: -1 }, mood: 'neutral' },
+    { text: '在公园里捡了一根树枝当魔法棒', e: { iq: 2, luck: 4 }, mood: 'good' },
+    { text: '非要穿超人披风去上学', e: { looks: -4, luck: 3 }, mood: 'neutral' },
+    { text: '把西瓜籽吞下去了，哭了一整天怕肚子里长西瓜', e: { iq: -3, luck: -2 }, mood: 'bad' },
+    { text: '学会了剪窗花，剪得满屋子都是碎纸', e: { iq: 3, looks: 2, luck: -2 }, mood: 'neutral' },
+    { text: '偷吃糖被发现了，被罚一周不能吃零食', e: { luck: -4, looks: -2 }, mood: 'bad' },
+    { text: '在泥坑里跳来跳去，变成了一只泥猴', e: { looks: -6, luck: 4 }, mood: 'good' },
+    { text: '和爷爷下棋输了，气得掀棋盘', e: { iq: 2, luck: -3, looks: -3 }, mood: 'bad' },
+    { text: '第一次放风筝，风筝线断了飞走了', e: { luck: -3, iq: 2 }, mood: 'bad' },
+    { text: '帮妈妈一起包饺子，捏出来的像外星生物', e: { iq: 2, luck: 3, looks: -2 }, mood: 'good' },
+    { text: '坚信自己是一只小猫，在地上爬了一整天', e: { iq: -5, luck: 3, looks: -3 }, mood: 'neutral' },
+    { text: '学会了唱「爱你孤身走暗巷」，天天吼', e: { looks: -3, luck: 2, iq: -2 }, mood: 'neutral' },
+    { text: '把家里的花瓶打碎了，嫁祸给猫', e: { iq: 3, luck: -5, looks: -2 }, mood: 'bad' },
+    { text: '对妈妈说「你是我的神！」妈妈一脸懵', e: { looks: 2, luck: 3, iq: -2 }, mood: 'good' },
+    { text: '看动画片看入迷了，叫三遍都听不见', e: { iq: -3, luck: -1 }, mood: 'bad' },
+    { text: '玩捉迷藏躲进衣柜里睡着了，全家找了半天', e: { luck: -4, looks: -2, iq: 2 }, mood: 'bad' },
+    { text: '在幼儿园毕业典礼上唱「听我说谢谢你」', e: { looks: 3, luck: 4, iq: -1 }, mood: 'good' },
+    { text: '偷穿妈妈的高跟鞋，摔了个四脚朝天', e: { looks: -4, luck: -4, iq: -2 }, mood: 'bad' },
+    { text: '【致命】发高烧引发肺炎，没扛过去', e: {}, mood: 'bad', deathMsg: '发高烧引发了肺炎，小小的身体没有扛过去' },
+  ],
+  school: [ // 7-12岁 — 34个事件
+    { text: '上小学了，背上了新书包', e: { iq: 5, luck: 3 }, mood: 'good' },
+    { text: '期末考试拿了全班第一名', e: { iq: 8, luck: 4 }, mood: 'good' },
+    { text: '考试没考好，被爸妈训了一顿', e: { iq: -2, luck: -3 }, mood: 'bad' },
+    { text: '参加了学校运动会，为班级争了光', e: { luck: 4, looks: 3 }, mood: 'good' },
+    { text: '被同学欺负了，很难过', e: { luck: -5, looks: -3 }, mood: 'bad' },
+    { text: '迷上了课外书，知识面大涨', e: { iq: 8, luck: 2 }, mood: 'good' },
+    { text: '被评为三好学生', e: { iq: 5, luck: 5, looks: 3 }, mood: 'good' },
+    { text: '学会了游泳', e: { luck: 4, looks: 3 }, mood: 'good' },
+    { text: '和最好的朋友闹别扭了', e: { luck: -4, iq: -2 }, mood: 'bad' },
+    { text: '感冒请了一周假，落下了功课', e: { iq: -3, luck: -2 }, mood: 'bad' },
+    { text: '参加了学校的画画比赛得了奖', e: { iq: 5, looks: 4 }, mood: 'good' },
+    { text: '被选为班长', e: { iq: 6, luck: 4, looks: 3 }, mood: 'good' },
+    { text: '偷玩电脑游戏被妈妈发现了', e: { iq: -2, luck: -3 }, mood: 'bad' },
+    { text: '养了一只小宠物，每天都很开心', e: { luck: 6, looks: 2 }, mood: 'good' },
+    { text: '在上学路上捡到了五块钱交给了老师', e: { iq: 3, luck: 4 }, mood: 'good' },
+    { text: '偷偷在课桌底下养了一只蜗牛当宠物', e: { iq: 2, luck: 2, looks: -1 }, mood: 'neutral' },
+    { text: '被老师点名起来回答问题，裤子拉链没拉', e: { looks: -8, luck: -4, iq: -2 }, mood: 'bad' },
+    { text: '参加合唱团但全程只张嘴不发声', e: { looks: 2, iq: -2, luck: 3 }, mood: 'neutral' },
+    { text: '用零花钱买了一只烤肠，被野狗抢走了', e: { wealth: -2, luck: -5 }, mood: 'bad' },
+    { text: '第一次自己骑车上学，差点迟到了', e: { iq: 3, luck: 2 }, mood: 'neutral' },
+    { text: '下雨天故意踩水坑，把裤子全弄湿了', e: { luck: -2, looks: -3, iq: -1 }, mood: 'bad' },
+    { text: '发明了一种只有自己看得懂的文字', e: { iq: 6, luck: 2 }, mood: 'good' },
+    { text: '和同桌画三八线，为了两毫米打了一架', e: { luck: -4, looks: -3, iq: -1 }, mood: 'bad' },
+    { text: '吃辣条被班主任抓住了', e: { luck: -4, looks: -2 }, mood: 'bad' },
+    { text: '在作文里写「我的理想是当一只猫」', e: { iq: -3, luck: 2, looks: 2 }, mood: 'neutral' },
+    { text: '期末考试超常发挥，成了全班黑马', e: { iq: 6, luck: 8, looks: 3 }, mood: 'good' },
+    { text: '上课偷吃辣条被老师抓到，当众社死', e: { looks: -6, luck: -4 }, mood: 'bad' },
+    { text: '在课本上画满了火柴人打仗', e: { iq: -3, looks: 2, luck: -1 }, mood: 'neutral' },
+    { text: '被同桌说「你妈给你梳的头好像鸡窝」', e: { looks: -5, luck: -2 }, mood: 'bad' },
+    { text: '学会了唱「孤勇者」，全班都跟着唱', e: { looks: 3, luck: 4, iq: -1 }, mood: 'good' },
+    { text: '在数学课上偷偷看小说，被没收了', e: { iq: -4, luck: -3 }, mood: 'bad' },
+    { text: '跟同学比谁能憋气更久，差点晕过去', e: { iq: -5, luck: -4, looks: -3 }, mood: 'bad' },
+    { text: '不小心把「老师」喊成了「妈妈」', e: { looks: -4, luck: -3, iq: -2 }, mood: 'bad' },
+  ],
+  teen: [ // 13-18岁 — 38个事件
+    { text: '进入青春期，开始在意自己的外表', e: { looks: 5, iq: -2 }, mood: 'neutral' },
+    { text: '中考顺利通过，考上了好高中', e: { iq: 10, luck: 5 }, mood: 'good' },
+    { text: '中考失利，去了普通学校', e: { iq: -3, luck: -5 }, mood: 'bad' },
+    { text: '早恋被老师发现了，请了家长', e: { looks: 4, luck: -4, iq: -3 }, mood: 'bad' },
+    { text: '交到了一群死党好朋友', e: { luck: 8, looks: 3 }, mood: 'good' },
+    { text: '迷上了打游戏，成绩下滑', e: { iq: -6, luck: -3 }, mood: 'bad' },
+    { text: '在才艺大赛上一展歌喉', e: { looks: 8, iq: 3, luck: 5 }, mood: 'good' },
+    { text: '高考超常发挥，考上好大学', e: { iq: 12, luck: 10, looks: 3 }, mood: 'good' },
+    { text: '高考失利，与理想大学失之交臂', e: { iq: -5, luck: -8 }, mood: 'bad' },
+    { text: '暗恋隔壁班同学，不敢表白', e: { looks: 3, iq: -3 }, mood: 'neutral' },
+    { text: '和同学打架受了伤', e: { looks: -8, luck: -3 }, mood: 'bad' },
+    { text: '读了很多课外书，思想变成熟了', e: { iq: 8, luck: 3 }, mood: 'good' },
+    { text: '学会了弹吉他', e: { looks: 5, iq: 3, luck: 3 }, mood: 'good' },
+    { text: '被选为学生代表发言', e: { iq: 5, looks: 4, luck: 4 }, mood: 'good' },
+    { text: '偷偷纹了个身贴，被爸妈发现了', e: { looks: 3, luck: -5, iq: -2 }, mood: 'bad' },
+    { text: '和同学通宵看动漫，第二天上课睡着了', e: { iq: -4, looks: -3, luck: -2 }, mood: 'bad' },
+    { text: '在校门口被小混混堵了', e: { luck: -6, looks: -3 }, mood: 'bad' },
+    { text: '在网上写小说，竟然有了一批读者', e: { iq: 6, luck: 4, looks: 2 }, mood: 'good' },
+    { text: '参加了学校的辩论赛，口才大涨', e: { iq: 7, looks: 4, luck: 3 }, mood: 'good' },
+    { text: '给自己起了个中二到爆的网名', e: { iq: -3, luck: 2, looks: -2 }, mood: 'neutral' },
+    { text: '在KTV唱了一首跑调的歌，成了朋友圈梗', e: { looks: -5, luck: 3, iq: -1 }, mood: 'neutral' },
+    { text: '偷偷买了手机晚上在被窝里玩', e: { iq: -3, luck: -2 }, mood: 'bad' },
+    { text: '长了一脸青春痘，都不敢见人了', e: { looks: -8, luck: -3 }, mood: 'bad' },
+    { text: '第一次坐飞机，紧张得手心出汗', e: { iq: 2, luck: 3 }, mood: 'neutral' },
+    { text: '迷上了某个明星，海报贴满房间', e: { looks: 2, wealth: -5, iq: -2 }, mood: 'neutral' },
+    { text: '被喜欢的异性表白了！心跳加速', e: { looks: 6, luck: 10, iq: 2 }, mood: 'good' },
+    { text: '在运动会上破了校纪录', e: { looks: 8, luck: 5, iq: 2 }, mood: 'good' },
+    { text: '烫了一个极其失败的头发', e: { looks: -10, luck: -4 }, mood: 'bad' },
+    { text: '开始戴牙套了，变成了钢牙妹/钢牙仔', e: { looks: -5, iq: 2 }, mood: 'neutral' },
+    { text: '在毕业会上哭成了泪人', e: { luck: 5, looks: -3 }, mood: 'neutral' },
+    { text: '觉得自己天下无敌，其实只是个菜鸡', e: { iq: -3, luck: 2, looks: -2 }, mood: 'neutral' },
+    { text: '在学校贴吧发帖吐槽食堂，被教导主任查水表', e: { luck: -6, iq: -2 }, mood: 'bad' },
+    { text: '在QQ空间发了一条「心累，懂的来」装深沉', e: { looks: -3, luck: 2, iq: -3 }, mood: 'neutral' },
+    { text: '和同学约好一起考清华，结果双双去了大专', e: { iq: -3, luck: -5, looks: -2 }, mood: 'bad' },
+    { text: '学会了抽烟，被逮到了', e: { looks: -4, luck: -5, iq: -2 }, mood: 'bad' },
+    { text: '【致命】在河里游泳时不幸溺水', e: {}, mood: 'bad', deathMsg: '在河里游泳时不幸溺水，再也没有上来' },
+    { text: '【致命】骑电动车出了车祸，没能抢救回来', e: {}, mood: 'bad', deathMsg: '骑电动车出了车祸，年轻的生命戛然而止' },
+  ],
+  youngAdult: [ // 19-30岁 — 40个事件
+    { text: '大学毕业了，拿到了学位证', e: { iq: 5, wealth: 8 }, mood: 'good' },
+    { text: '找到了人生第一份工作', e: { wealth: 12, iq: 3, luck: 3 }, mood: 'good' },
+    { text: '被公司裁员了，很迷茫', e: { wealth: -8, luck: -5 }, mood: 'bad' },
+    { text: '升职加薪了！努力有了回报', e: { wealth: 15, iq: 5, luck: 3 }, mood: 'good' },
+    { text: '遇到了心仪的人，恋爱了', e: { looks: 5, luck: 10, wealth: -3 }, mood: 'good' },
+    { text: '失恋了，心碎了一地', e: { looks: -5, luck: -6 }, mood: 'bad' },
+    { text: '创业成功，赚到了第一桶金', e: { wealth: 25, iq: 8, luck: 10 }, mood: 'good' },
+    { text: '创业失败，血本无归', e: { wealth: -20, luck: -10, iq: 3 }, mood: 'bad' },
+    { text: '中了彩票，天降横财', e: { wealth: 30, luck: 15 }, mood: 'good' },
+    { text: '被骗子骗走了积蓄', e: { wealth: -15, luck: -10 }, mood: 'bad' },
+    { text: '出国留学深造，开阔了眼界', e: { iq: 12, wealth: -8, looks: 3 }, mood: 'good' },
+    { text: '买了人生第一套房', e: { wealth: -15, luck: 5 }, mood: 'neutral' },
+    { text: '结婚啦！人生新阶段', e: { luck: 10, looks: 5, wealth: -8 }, mood: 'good' },
+    { text: '自己做饭把厨房差点点了', e: { wealth: -3, luck: -3 }, mood: 'bad' },
+    { text: '跑了一次马拉松，很有成就感', e: { looks: 5, luck: 4, iq: 3 }, mood: 'good' },
+    { text: '和好朋友一起旅行，很开心', e: { luck: 8, looks: 3 }, mood: 'good' },
+    { text: '被领导PUA，身心俱疲', e: { iq: -3, luck: -5, looks: -3 }, mood: 'bad' },
+    { text: '在路边捡了一只流浪猫，带回了家', e: { luck: 6, looks: 3, wealth: -3 }, mood: 'good' },
+    { text: '参加同学婚礼，被催婚了', e: { luck: -3, looks: 2 }, mood: 'bad' },
+    { text: '被朋友拉去听了一场传销课，差点入坑', e: { iq: 2, wealth: -5, luck: -6 }, mood: 'bad' },
+    { text: '学会了做饭，至少不会饿死了', e: { iq: 3, looks: 3, luck: 2 }, mood: 'good' },
+    { text: '心血来潮去染了个绿头发', e: { looks: -6, luck: 3 }, mood: 'neutral' },
+    { text: '在超市抽奖中了一袋大米', e: { luck: 4, wealth: 1 }, mood: 'good' },
+    { text: '给前任的朋友圈点了赞，手贱了', e: { luck: -5, looks: -2 }, mood: 'bad' },
+    { text: '报名健身房但只去了三次', e: { wealth: -5, looks: 1, luck: -2 }, mood: 'bad' },
+    { text: '在网上被人杠了，大战三百回合', e: { iq: 2, luck: -3, looks: -2 }, mood: 'bad' },
+    { text: '深夜emo发了一条朋友圈，第二天赶紧删了', e: { luck: -3, looks: -2 }, mood: 'bad' },
+    { text: '周末睡到下午两点，感觉人生都荒废了', e: { iq: -2, luck: -2 }, mood: 'bad' },
+    { text: '在地铁上给老人让座，老人说「你坐吧你看起来更累」', e: { looks: -5, luck: 3 }, mood: 'neutral' },
+    { text: '心血来潮报了个瑜伽班，拉伤了腰', e: { looks: 2, luck: -4, wealth: -3 }, mood: 'bad' },
+    { text: '和同事一起吐槽老板，结果老板就在身后', e: { wealth: -8, luck: -8, looks: -3 }, mood: 'bad' },
+    { text: '在大雨中狂奔回家，感冒了一周', e: { luck: -5, looks: -3 }, mood: 'bad' },
+    { text: '我嘞个豆！发现同事在偷偷摸鱼', e: { iq: 2, luck: 3 }, mood: 'neutral' },
+    { text: '完了芭比Q了，电脑蓝屏文件没保存', e: { iq: -3, luck: -6, wealth: -3 }, mood: 'bad' },
+    { text: '我真的会谢，外卖被偷了', e: { luck: -4, wealth: -3 }, mood: 'bad' },
+    { text: '命运的齿轮开始转动……然后卡住了', e: { luck: 2, iq: -2 }, mood: 'neutral' },
+    { text: '家人们谁懂啊，周末还要加班', e: { luck: -5, looks: -3, iq: -2 }, mood: 'bad' },
+    { text: '遇到一个老六同事，活全推给我干', e: { iq: -2, luck: -5, wealth: -3 }, mood: 'bad' },
+    { text: '绝绝子！这个月的KPI居然达标了', e: { wealth: 8, luck: 5, looks: 2 }, mood: 'good' },
+    { text: '泼天的富贵终于轮到我了？并没有', e: { luck: -3, wealth: -2 }, mood: 'bad' },
+    { text: '泰裤辣！学会了新技能', e: { iq: 6, looks: 3, luck: 3 }, mood: 'good' },
+    { text: '你个老六我是真服了，又被坑了', e: { luck: -4, iq: -2 }, mood: 'bad' },
+    { text: '栓Q，今天又是摸鱼的一天', e: { iq: -3, luck: 2 }, mood: 'neutral' },
+  ],
+  midlife: [ // 31-50岁 — 44个事件
+    { text: '事业达到巅峰，行业内小有名气', e: { wealth: 20, iq: 8, luck: 5 }, mood: 'good' },
+    { text: '被提拔为部门主管', e: { wealth: 15, iq: 5, luck: 5 }, mood: 'good' },
+    { text: '公司倒闭了，中年失业', e: { wealth: -20, luck: -10 }, mood: 'bad' },
+    { text: '孩子出生了，初为人父母', e: { luck: 10, wealth: -8, looks: -3 }, mood: 'good' },
+    { text: '投资理财赚了一大笔', e: { wealth: 20, luck: 10 }, mood: 'good' },
+    { text: '投资失败，亏了不少钱', e: { wealth: -20, luck: -10 }, mood: 'bad' },
+    { text: '身体开始出现各种小毛病', e: { looks: -5, luck: -5 }, mood: 'bad' },
+    { text: '拿到了行业大奖', e: { iq: 10, wealth: 10, luck: 8 }, mood: 'good' },
+    { text: '孩子考上了好学校', e: { luck: 10, iq: 5, wealth: -5 }, mood: 'good' },
+    { text: '被降职了，心情低落', e: { wealth: -10, luck: -5, looks: -3 }, mood: 'bad' },
+    { text: '换了辆新车', e: { wealth: -8, luck: 3 }, mood: 'neutral' },
+    { text: '体检报告显示身体出了点问题', e: { luck: -10, looks: -5 }, mood: 'bad' },
+    { text: '和老同学聚会，感慨万千', e: { luck: 6, looks: 2 }, mood: 'good' },
+    { text: '开始发福了，体重控制不住了', e: { looks: -5, luck: -2 }, mood: 'bad' },
+    { text: '学习了新技能，打开了新世界', e: { iq: 8, luck: 5 }, mood: 'good' },
+    { text: '和伴侣大吵了一架', e: { luck: -6, looks: -3 }, mood: 'bad' },
+    { text: '升职为总经理，年薪破百万', e: { wealth: 25, iq: 8, luck: 5 }, mood: 'good' },
+    { text: '半夜失眠刷短视频，刷到天亮', e: { iq: -3, looks: -3, luck: -2 }, mood: 'bad' },
+    { text: '在家长群和别的家长吵起来了', e: { luck: -4, looks: -3 }, mood: 'bad' },
+    { text: '买了一台跑步机当晾衣架', e: { wealth: -8, looks: 1, luck: -3 }, mood: 'bad' },
+    { text: '被年轻人叫「叔叔/阿姨」，心态崩了', e: { looks: -5, luck: -3 }, mood: 'bad' },
+    { text: '开始研究养生，保温杯里泡枸杞', e: { looks: 3, luck: 3 }, mood: 'neutral' },
+    { text: '被拉进了小学同学群，没人说话', e: { luck: 2, iq: 1 }, mood: 'neutral' },
+    { text: '带全家去旅行，累并快乐着', e: { luck: 8, wealth: -8, looks: 3 }, mood: 'good' },
+    { text: '发现头上有了白头发', e: { looks: -4, luck: -2 }, mood: 'bad' },
+    { text: '参加了马拉松，虽然跑的是五公里', e: { looks: 4, luck: 3, iq: 2 }, mood: 'good' },
+    { text: '给孩子辅导作业，差点心梗', e: { iq: -2, luck: -5, looks: -3 }, mood: 'bad' },
+    { text: '和多年未见的老友重逢，喝了个大醉', e: { luck: 8, looks: 2, wealth: -3 }, mood: 'good' },
+    { text: '被裁员后自己创业，居然做起来了', e: { wealth: 18, iq: 8, luck: 10 }, mood: 'good' },
+    { text: '迷上了钓鱼，周末五点就出门', e: { luck: 4, looks: 2, iq: 2 }, mood: 'good' },
+    { text: '在二手平台卖东西，被买家砍价砍到怀疑人生', e: { wealth: -2, luck: -3, iq: -2 }, mood: 'bad' },
+    { text: '孩子进入了叛逆期，天天吵架', e: { luck: -5, iq: -3, looks: -2 }, mood: 'bad' },
+  ],
+  elderly: [ // 51-70岁 — 30个事件
+    { text: '退休了，终于可以歇歇了', e: { wealth: -3, luck: 8 }, mood: 'neutral' },
+    { text: '抱上了孙子/孙女，满心欢喜', e: { luck: 15, looks: 3 }, mood: 'good' },
+    { text: '身体大不如前了', e: { luck: -8, looks: -6 }, mood: 'bad' },
+    { text: '老伴去世了，悲痛欲绝', e: { luck: -15, looks: -5 }, mood: 'bad' },
+    { text: '参加了老年大学，认识了很多朋友', e: { iq: 5, luck: 8 }, mood: 'good' },
+    { text: '和老伴一起环游世界', e: { luck: 15, wealth: -12, looks: 3 }, mood: 'good' },
+    { text: '做了个大手术，捡回一条命', e: { luck: -12, looks: -5, wealth: -10 }, mood: 'bad' },
+    { text: '开始写回忆录', e: { iq: 8, luck: 5 }, mood: 'good' },
+    { text: '被评上了社区之星', e: { iq: 5, luck: 8, looks: 3 }, mood: 'good' },
+    { text: '遇到了电信诈骗，差点上当', e: { wealth: -5, luck: -5, iq: 3 }, mood: 'bad' },
+    { text: '老朋友又走了一位', e: { luck: -6, looks: -2 }, mood: 'bad' },
+    { text: '过了个热热闹闹的生日', e: { luck: 8, looks: 2 }, mood: 'good' },
+    { text: '开始练太极，身体硬朗了不少', e: { looks: 5, luck: 5 }, mood: 'good' },
+    { text: '孩子们都成家了，很欣慰', e: { luck: 10, looks: 3 }, mood: 'good' },
+    { text: '发现自己得了重病', e: { luck: -18, looks: -8 }, mood: 'bad' },
+    { text: '和老朋友在公园下了一整天的棋', e: { iq: 4, luck: 5, looks: 2 }, mood: 'good' },
+    { text: '迷上了广场舞，天天去跳', e: { looks: 4, luck: 5, wealth: -2 }, mood: 'good' },
+    { text: '收到了孩子寄来的礼物，心里暖暖的', e: { luck: 8, looks: 3 }, mood: 'good' },
+    { text: '学会了用智能手机，开始刷短视频', e: { iq: 4, luck: 3 }, mood: 'neutral' },
+    { text: '参加了社区书法比赛，拿了二等奖', e: { iq: 5, looks: 3, luck: 4 }, mood: 'good' },
+    { text: '和老伴拌嘴了，谁也不理谁', e: { luck: -4, looks: -2 }, mood: 'bad' },
+    { text: '在菜市场为了两毛钱和摊主吵了半天', e: { wealth: 1, luck: -3, looks: -2 }, mood: 'bad' },
+    { text: '被孙子教着玩手机游戏，一个也玩不明白', e: { iq: -3, luck: 3, looks: 2 }, mood: 'neutral' },
+    { text: '翻出了年轻时的照片，看了很久', e: { luck: 5, looks: 2 }, mood: 'neutral' },
+    { text: '种了一院子花，每天浇水', e: { luck: 6, looks: 4 }, mood: 'good' },
+    { text: '晚上睡觉腿抽筋，疼醒了', e: { luck: -3, looks: -2 }, mood: 'bad' },
+    { text: '被老朋友拉去爬山，居然爬完了', e: { looks: 5, luck: 5, iq: 2 }, mood: 'good' },
+    { text: '给孙子讲故事，讲着讲着自己睡着了', e: { luck: 4, looks: 2 }, mood: 'neutral' },
+    { text: '和老伴一起看夕阳，很美', e: { luck: 10, looks: 3 }, mood: 'good' },
+    { text: '发现自己的记忆力越来越差了', e: { iq: -6, luck: -4 }, mood: 'bad' },
+    { text: '在相亲角给孙子/孙女挂牌找对象', e: { luck: 3, looks: -2 }, mood: 'neutral' },
+    { text: '学会了发微信语音，一按就是60秒', e: { iq: 3, luck: 2 }, mood: 'neutral' },
+    { text: '在家族群里转发了养生谣言「震惊！」', e: { iq: -3, luck: -1, looks: -2 }, mood: 'bad' },
+    { text: '被晚辈教用扫码支付，举着手机转了三个圈', e: { iq: 2, luck: 3 }, mood: 'neutral' },
+    { text: '在公园遇到了一个聊得来的老姐妹/老兄弟', e: { luck: 8, looks: 3 }, mood: 'good' },
+    { text: '去理发店被Tony忽悠办卡，竟然办了', e: { wealth: -5, looks: -3, luck: -3 }, mood: 'bad' },
+    { text: '看着广场舞视频自学，跳得有模有样', e: { looks: 4, luck: 4, iq: 2 }, mood: 'good' },
+    { text: '给年轻人讲过去的故事，人家根本不感兴趣', e: { luck: -2, iq: 1, looks: -2 }, mood: 'bad' },
+    { text: '坐公交车忘了老年卡放哪了，翻遍全身上下', e: { luck: -4, looks: -3 }, mood: 'bad' },
+    { text: '艾特全体成员！在家族群里发了一个大红包', e: { wealth: -5, luck: 8, looks: 3 }, mood: 'good' },
+    { text: '和老伙伴们组建了「夕阳红合唱团」', e: { looks: 4, luck: 6, iq: 3 }, mood: 'good' },
+    { text: '在抖音上发了跳舞视频，居然火了', e: { looks: 5, luck: 8, wealth: 3 }, mood: 'good' },
+    { text: '【致命】中风偏瘫，在床上躺了半年后走了', e: {}, mood: 'bad', deathMsg: '中风偏瘫，在床上躺了半年后安详地离开了' },
+  ],
+  old: [ // 71岁+ — 35个事件
+    { text: '天气好的时候在公园里晒太阳', e: { luck: 3 }, mood: 'neutral' },
+    { text: '走路已经需要拐杖了', e: { luck: -3, looks: -5 }, mood: 'bad' },
+    { text: '老朋友又走了一位，越来越孤单', e: { luck: -8, looks: -2 }, mood: 'bad' },
+    { text: '身体一天不如一天了', e: { luck: -10, looks: -5 }, mood: 'bad' },
+    { text: '四世同堂，天伦之乐', e: { luck: 15, looks: 3 }, mood: 'good' },
+    { text: '回顾这一生，有笑有泪，值了', e: { iq: 5, luck: 5 }, mood: 'neutral' },
+    { text: '收到了一封来自老友的信', e: { luck: 8 }, mood: 'good' },
+    { text: '状态不错，多吃了一碗饭', e: { luck: 3, looks: 2 }, mood: 'good' },
+    { text: '生了一场大病，住进了医院', e: { luck: -15, looks: -5 }, mood: 'bad' },
+    { text: '子孙们都回来过年了', e: { luck: 12, looks: 3 }, mood: 'good' },
+    { text: '在摇椅上晒太阳，一只猫跳到了腿上', e: { luck: 5, looks: 2 }, mood: 'good' },
+    { text: '听力越来越不好，和人说话全靠喊', e: { luck: -3, looks: -4 }, mood: 'bad' },
+    { text: '收到了百岁老人津贴', e: { wealth: 5, luck: 5 }, mood: 'good' },
+    { text: '让孙子教自己用手机，学完就忘', e: { iq: -3, luck: 2 }, mood: 'neutral' },
+    { text: '在养老院交到了新的牌友', e: { luck: 6, looks: 2 }, mood: 'good' },
+    { text: '吃到了小时候最爱的味道，泪目了', e: { luck: 8, looks: 2 }, mood: 'good' },
+    { text: '牙齿又掉了一颗', e: { looks: -4, luck: -2 }, mood: 'bad' },
+    { text: '被推着轮椅在花园里散步', e: { luck: 3, looks: -3 }, mood: 'neutral' },
+    { text: '握着老伴的手，说了一辈子的话', e: { luck: 10, looks: 3 }, mood: 'good' },
+    { text: '望着窗外的天空，心里很平静', e: { luck: 6 }, mood: 'neutral' },
+    { text: '在养老院的相亲角找到了黄昏恋', e: { luck: 10, looks: 3 }, mood: 'good' },
+    { text: '跟隔壁床的老头/老太吵架，因为电视音量', e: { luck: -3, looks: -2 }, mood: 'bad' },
+    { text: '用老人机给孙子发了条短信，写了一个小时', e: { iq: 2, luck: 3 }, mood: 'neutral' },
+    { text: '听说年轻人都在搞AI，自己也研究了一下，没懂', e: { iq: -2, luck: 1 }, mood: 'neutral' },
+    { text: '活到这把年纪，什么梗都见过了', e: { iq: 3, luck: 4, looks: 2 }, mood: 'good' },
+  ],
+};
 
-function randomStat() {
-  // 正态分布近似 (3d6 * 10 ~ 平均50)
-  let v = 0;
-  for (let i = 0; i < 3; i++) v += Math.random() * 33;
-  return Math.round(Math.min(99, Math.max(1, v)));
-}
+// 致死事件（低概率触发）
+const deathEvents = [
+  '遭遇了严重的交通事故，没能挺过来',
+  '突发心脏病，抢救无效',
+  '在睡梦中安详地离开了人世',
+  '得了一场急病，医生也无力回天',
+  '出门遇到了意外，永远地离开了',
+  '吃花生米噎住了，就这么走了',
+  '在睡梦中再也没有醒过来',
+  '在自家院子里浇花时倒下了',
+  '为了救落水的小孩，用尽了最后的力气',
+  '被确诊了绝症，安详地走完了最后一程',
+  '在看最喜欢的电视剧时安静地离开了',
+  '在生日当天，吃完蛋糕后安详离世',
+  '因为医疗事故，永远留在了手术台上',
+  '在旅途中突发疾病，客死异乡',
+  '被一场突如其来的灾难夺走了生命',
+];
 
-function randomTraits() {
-  const pool = [
-    { name: '🧠 天才', type: 'gold', min: 80, stat: 'iq' },
-    { name: '📖 学霸', type: 'gold', min: 70, stat: 'iq' },
-    { name: '💪 强壮', type: 'gold', min: 0 },
-    { name: '🎨 艺术细胞', type: 'gold', min: 0 },
-    { name: '🎤 唱歌好听', type: 'gold', min: 0 },
-    { name: '🏃 跑得快', type: 'gold', min: 0 },
-    { name: '💰 富二代', type: 'gold', min: 80, stat: 'wealth' },
-    { name: '💎 锦鲤体质', type: 'gold', min: 80, stat: 'luck' },
-    { name: '💃 颜值爆表', type: 'gold', min: 80, stat: 'looks' },
-    { name: '😅 非酋', type: 'red', max: 20, stat: 'luck' },
-    { name: '🤦 手残', type: 'red', max: 0 },
-    { name: '🐌 慢吞吞', type: 'red', max: 0 },
-    { name: '💸 月光族', type: 'red', max: 30, stat: 'wealth' },
-    { name: '😴 嗜睡症', type: 'red', max: 0 },
-    { name: '🤧 体弱多病', type: 'red', max: 0 },
-    { name: '🧐 选择困难', type: 'red', max: 0 },
-    { name: '🐟 摸鱼达人', type: 'gold', min: 0 },
-    { name: '🍜 吃货', type: 'gold', min: 0 },
-    { name: '😺 吸猫体质', type: 'gold', min: 0 },
-    { name: '🔧 动手能力强', type: 'gold', min: 0 },
-  ];
-  const selected = [];
-  const shuffled = pool.sort(() => Math.random() - .5);
-  for (const t of shuffled) {
-    if (selected.length >= 3) break;
-    // Don't add conflicting traits
-    if (t.name === '💰 富二代' && selected.some(s => s.name === '💸 月光族')) continue;
-    selected.push(t);
-  }
-  return selected;
-}
-
+// ====== 人生状态 ======
+let life = null;
 let usedNames = new Set();
 
-function reroll() {
-  const card = document.getElementById('card');
-  const avatar = document.getElementById('avatar');
-  const name = document.getElementById('name');
-  const title = document.getElementById('titleLine');
-  const bio = document.getElementById('bio');
-  const traits = document.getElementById('traits');
-  const lives = document.getElementById('lives');
+// ====== 工具函数 ======
+function randomStat() {
+  let v = 0;
+  for (let i = 0; i < 3; i++) v += Math.random() * 33;
+  return Math.round(Math.min(99, Math.max(5, v)));
+}
 
-  // 动画
-  avatar.classList.remove('shake');
-  void avatar.offsetWidth;
-  avatar.classList.add('shake');
-  card.style.opacity = '.5';
-  card.style.transform = 'scale(.97)';
+function randomName() {
+  const n = lastNames[Math.floor(Math.random()*lastNames.length)]
+          + firstNames[Math.floor(Math.random()*firstNames.length)];
+  if (usedNames.has(n)) return randomName();
+  return n;
+}
 
-  setTimeout(() => {
-    // 生成数据
-    let n;
-    do { n = randomName(); } while (usedNames.has(n));
-    usedNames.add(n);
-    if (usedNames.size > 100) usedNames.clear();
-    name.textContent = n;
+function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
-    avatar.textContent = avatars[Math.floor(Math.random() * avatars.length)];
+const genderAvatars = {
+  male: {
+    baby: ['👶','🍼'],
+    child: ['👦','🧒'],
+    school: ['👦','🧒'],
+    teen: ['👦','🧑'],
+    young: ['👨','🧔','🤴'],
+    midlife: ['👨','🧔'],
+    elderly: ['👴','🧓'],
+    old: ['👴','🧓'],
+  },
+  female: {
+    baby: ['👶','🍼'],
+    child: ['👧','🧒'],
+    school: ['👧','🧒'],
+    teen: ['👧','👩'],
+    young: ['👩','👸','🧚'],
+    midlife: ['👩','🧑'],
+    elderly: ['👵','🧓'],
+    old: ['👵','🧓'],
+  },
+};
 
-    const iq = randomStat();
-    const wealth = randomStat();
-    const looks = randomStat();
-    const luck = randomStat();
+function getAgeAvatar(age, gender) {
+  const g = gender === 'female' ? 'female' : 'male';
+  let stage;
+  if (age <= 3) stage = 'baby';
+  else if (age <= 6) stage = 'child';
+  else if (age <= 12) stage = 'school';
+  else if (age <= 18) stage = 'teen';
+  else if (age <= 30) stage = 'young';
+  else if (age <= 50) stage = 'midlife';
+  else if (age <= 70) stage = 'elderly';
+  else stage = 'old';
+  const pool = genderAvatars[g][stage];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
 
-    setStat('iq', iq);
-    setStat('wealth', wealth);
-    setStat('looks', looks);
-    setStat('luck', luck);
+function getAgeStage(age) {
+  if (age <= 3) return 'infant';
+  if (age <= 6) return 'child';
+  if (age <= 12) return 'school';
+  if (age <= 18) return 'teen';
+  if (age <= 30) return 'youngAdult';
+  if (age <= 50) return 'midlife';
+  if (age <= 70) return 'elderly';
+  return 'old';
+}
 
-    const traitList = randomTraits();
-    traits.innerHTML = traitList.map(t =>
-      `<span class="trait ${t.type}">${t.name}</span>`
-    ).join('');
+function getDeathChance(age, luck) {
+  // 基础死亡率随年龄递增
+  let chance = 0;
+  if (age <= 3) chance = 0.008;  // 婴儿期稍高
+  else if (age <= 10) chance = 0.003;
+  else if (age <= 20) chance = 0.005; // 青少年意外
+  else if (age <= 30) chance = 0.003;
+  else if (age <= 50) chance = 0.005;
+  else if (age <= 70) chance = 0.02;
+  else if (age <= 80) chance = 0.08;
+  else if (age <= 90) chance = 0.2;
+  else chance = 0.4;
 
-    // 人生总结
-    const lifeDescs = [
-      iq < 20 ? '智商堪忧，但快乐就好' :
-      iq > 80 ? '聪明绝顶，头发还剩几根' :
-      iq > 60 ? '脑子不错，偶尔短路' : '普通智商，正常发挥',
-      wealth < 20 ? '钱包比脸干净' :
-      wealth > 80 ? '财富自由，朴实无华' :
-      wealth > 60 ? '小有积蓄，偶尔奢侈' : '勉强糊口，够用就行',
-      looks < 20 ? '心灵美的典范' :
-      looks > 80 ? '靠脸吃饭，排队要签名' :
-      looks > 60 ? '五官端正，挺耐看的' : '路人甲乙丙丁',
-      luck < 20 ? '喝凉水都塞牙' :
-      luck > 80 ? '天选之子，开挂人生' :
-      luck > 60 ? '运气不错，偶尔中奖' : '平平淡淡才是真',
-    ];
+  // 运气差增加死亡率
+  if (luck < 10 && age > 30) chance += 0.05;
+  if (luck < 5 && age > 40) chance += 0.1;
 
-    const titles = [
-      '的奇妙人生', '的平凡日常', '的起伏人生',
-      '的传奇故事', '的摸鱼生涯', '的躺平生活',
-      '的逆袭之路', '的佛系人生',
-    ];
+  return Math.min(chance, 0.8);
+}
 
-    title.textContent = `「${n}」${titles[Math.floor(Math.random() * titles.length)]}`;
-    bio.textContent = `🧬 ${lifeDescs[0]} · ${lifeDescs[1]} · ${lifeDescs[2]} · ${lifeDescs[3]}`;
+// ====== 核心逻辑 ======
+function pickEvent(age) {
+  const stage = getAgeStage(age);
+  const pool = eventPools[stage];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
 
-    lives.textContent = parseInt(lives.textContent) + 1;
+function applyEffects(effects) {
+  if (!life) return;
+  const keys = ['iq','wealth','looks','luck'];
+  const deltas = {};
+  for (const k of keys) {
+    let delta = effects[k] || 0;
+    // 高属性衰减：超过60效果减半，超过80只剩三成
+    if (delta > 0 && life[k] >= 80) delta = Math.round(delta * 0.3);
+    else if (delta > 0 && life[k] >= 60) delta = Math.round(delta * 0.6);
+    // 属性过低时负面效果减半（保护）
+    if (delta < 0 && life[k] <= 10) delta = Math.round(delta * 0.4);
+    life[k] = clamp(life[k] + delta, 0, 100);
+    deltas[k] = delta;
+  }
+  return deltas;
+}
 
-    card.style.opacity = '1';
-    card.style.transform = 'scale(1)';
-  }, 400);
+function die(cause) {
+  if (!life || !life.alive) return;
+  life.alive = false;
+
+  // 加死亡事件到时间线
+  life.events.push({ age: life.age, text: cause, isDeath: true });
+
+  // 更新 UI
+  document.getElementById('avatar').textContent = '💀';
+  document.getElementById('ageDisplay').textContent = `享年 ${life.age} 岁`;
+  document.getElementById('eventBox').className = 'event-box death';
+  document.getElementById('eventText').innerHTML = `<span class="age-tag">${life.age}岁</span>${cause}`;
+
+  // 显示时间线
+  renderTimeline();
+
+  // 显示死亡总结
+  document.getElementById('deathSummary').classList.add('show');
+  document.getElementById('deathAge').textContent = `终年 ${life.age} 岁`;
+  document.getElementById('deathCause').textContent = `💀 ${cause}`;
+
+  // 按钮切换
+  document.getElementById('btnNext').classList.remove('btn-dead');
+  document.getElementById('btnNext').classList.add('btn-dead');
+  document.getElementById('btnHome').classList.remove('btn-dead');
+
+  // 更新总寿命统计
+  document.getElementById('lives').textContent = parseInt(document.getElementById('lives').textContent) + 1;
+}
+
+function renderEvent(entry) {
+  const box = document.getElementById('eventBox');
+  const text = document.getElementById('eventText');
+  box.className = 'event-box ' + (entry.mood || 'neutral');
+  text.innerHTML = `<span class="age-tag">${entry.age}岁</span>${entry.text}`;
+
+  // 如果有属性变化且非死亡事件，显示效果
+  if (entry.deltas && !entry.isDeath) {
+    const parts = [];
+    for (const [k, v] of Object.entries(entry.deltas)) {
+      if (v === 0) continue;
+      const labels = { iq: '🧠智商', wealth: '💰财运', looks: '❤️颜值', luck: '🍀运气' };
+      const cls = v > 0 ? 'up' : 'down';
+      const sign = v > 0 ? '+' : '';
+      parts.push(`<span class="${cls}">${labels[k]} ${sign}${v}</span>`);
+    }
+    if (parts.length) {
+      text.innerHTML += `<div class="event-effects">${parts.join(' · ')}</div>`;
+    }
+  }
+}
+
+function renderTimeline() {
+  const tl = document.getElementById('timeline');
+  tl.innerHTML = '';
+  for (const entry of life.events) {
+    const div = document.createElement('div');
+    div.className = 'tl-entry' + (entry.isDeath ? ' death' : '');
+    div.innerHTML = `<span class="tl-age">${entry.age}岁</span><span class="tl-text">${entry.text}</span>`;
+    tl.appendChild(div);
+  }
+  tl.classList.add('show');
+  // 滚到底
+  setTimeout(() => { tl.scrollTop = tl.scrollHeight; }, 50);
 }
 
 function setStat(id, val) {
@@ -361,13 +848,137 @@ function setStat(id, val) {
   bar.style.background = statColors[idx];
 }
 
-// 键盘
+function updateStatsUI() {
+  if (!life) return;
+  setStat('iq', life.iq);
+  setStat('wealth', life.wealth);
+  setStat('looks', life.looks);
+  setStat('luck', life.luck);
+}
+
+function updateAgeUI() {
+  document.getElementById('ageDisplay').textContent = life.age + ' 岁';
+  document.getElementById('avatar').textContent = getAgeAvatar(life.age, life.gender);
+}
+
+// ====== 对外接口 ======
+function startLife() {
+  // 重置
+  document.getElementById('eventBox').className = 'event-box';
+  document.getElementById('timeline').classList.remove('show');
+  document.getElementById('timeline').innerHTML = '';
+  document.getElementById('deathSummary').classList.remove('show');
+  document.getElementById('btnNext').classList.remove('btn-dead');
+
+  document.getElementById('card').style.opacity = '.5';
+  document.getElementById('card').style.transform = 'scale(.97)';
+
+  setTimeout(() => {
+    const n = randomName();
+    usedNames.add(n);
+    if (usedNames.size > 200) usedNames.clear();
+
+    const titles = [
+      '的奇妙人生', '的平凡日常', '的起伏人生',
+      '的传奇故事', '的摸鱼生涯', '的躺平生活',
+      '的逆袭之路', '的佛系人生',
+    ];
+
+    const gender = Math.random() < 0.5 ? 'male' : 'female';
+    life = {
+      name: n,
+      gender: gender,
+      iq: randomStat(),
+      wealth: randomStat(),
+      looks: randomStat(),
+      luck: randomStat(),
+      age: 1,
+      alive: true,
+      events: [],
+    };
+
+    document.getElementById('name').textContent = n;
+    document.getElementById('genderBadge').textContent = gender === 'male' ? '♂ 男' : '♀ 女';
+    document.getElementById('avatar').textContent = getAgeAvatar(1, gender);
+    document.getElementById('titleLine').textContent = `「${n}」${titles[Math.floor(Math.random() * titles.length)]}`;
+
+    updateStatsUI();
+    updateAgeUI();
+
+    // 第一年事件
+    const evt = pickEvent(1);
+    const deltas = applyEffects(evt.e);
+    updateStatsUI();
+
+    const entry = { age: 1, text: evt.text, mood: evt.mood, deltas };
+    life.events.push(entry);
+    renderEvent(entry);
+
+    document.getElementById('card').style.opacity = '1';
+    document.getElementById('card').style.transform = 'scale(1)';
+  }, 350);
+}
+
+function nextYear() {
+  if (!life || !life.alive) return;
+
+  life.age++;
+
+  // 死亡判定
+  const deathRoll = Math.random();
+  const deathChance = getDeathChance(life.age, life.luck);
+
+  if (deathRoll < deathChance) {
+    const cause = deathEvents[Math.floor(Math.random() * deathEvents.length)];
+    die(cause);
+    return;
+  }
+
+  // 抽事件
+  const evt = pickEvent(life.age);
+  const deltas = applyEffects(evt.e);
+  updateStatsUI();
+  updateAgeUI();
+
+  // 事件致死（早夭/意外）
+  if (evt.deathMsg) {
+    die(evt.deathMsg);
+    return;
+  }
+
+  const entry = { age: life.age, text: evt.text, mood: evt.mood, deltas };
+  life.events.push(entry);
+  renderEvent(entry);
+
+  // 低运气也可能触发死亡（事件中有致死因素）
+  if (life.luck <= 0 && life.age > 40) {
+    die('运气耗尽，这一生走到了尽头');
+    return;
+  }
+
+  // 高龄也有小概率自然离世
+  if (life.age >= 90 && Math.random() < 0.15) {
+    die('在睡梦中安详地离开了人世');
+    return;
+  }
+  if (life.age >= 100) {
+    die('长寿百岁，无疾而终');
+    return;
+  }
+}
+
+// ====== 键盘 ======
 document.addEventListener('keydown', e => {
-  if (e.key === ' ') { e.preventDefault(); reroll(); }
+  if (e.key === ' ') {
+    e.preventDefault();
+    if (life && life.alive) nextYear();
+    else startLife();
+  }
+  if (e.key === 'r' || e.key === 'R') startLife();
 });
 
-// 开局先来一局
-reroll();
+// ====== 初始化 ======
+document.getElementById('btnNext').classList.add('btn-dead');
 </script>
 </body>
 </html>

@@ -1,0 +1,375 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>灵魂监牢 · 规则怪谈</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100svh;background:linear-gradient(135deg,#08080e,#0e0618,#060612);font-family:system-ui,'Segoe UI',sans-serif;display:flex;justify-content:center;align-items:center;padding:1.2rem;touch-action:manipulation}
+.container{text-align:center;max-width:520px;width:100%}
+h1{color:rgba(200,100,255,.5);font-size:1rem;font-weight:300;letter-spacing:.2em;margin-bottom:.1rem}
+.sub{color:rgba(255,255,255,.08);font-size:.6rem;margin-bottom:.8rem}
+#stars{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.star{position:absolute;width:2px;height:2px;background:rgba(255,255,255,.15);border-radius:50%;animation:twinkle var(--d) ease-in-out infinite alternate}
+@keyframes twinkle{0%{opacity:.05}100%{opacity:.4}}
+.card{background:rgba(255,255,255,.012);border:1px solid rgba(255,255,255,.025);border-radius:18px;padding:1rem;margin-bottom:.8rem;min-height:360px;position:relative;z-index:1}
+.hp-bar{height:10px;background:rgba(255,255,255,.03);border-radius:5px;overflow:hidden;margin-bottom:.6rem;position:relative}
+.hp-fill{height:100%;background:linear-gradient(90deg,#ff6b6b,#69db7c);border-radius:5px;transition:width .3s}
+.hp-text{position:absolute;right:6px;top:-14px;font-size:.6rem;color:rgba(255,255,255,.12)}
+.dot-bar{display:flex;gap:3px;justify-content:center;margin-bottom:.6rem;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.02);transition:all .3s}
+.dot.done{background:rgba(100,255,180,.12);border-color:rgba(100,255,180,.08)}
+.dot.perfect{background:rgba(255,215,0,.2);border-color:rgba(255,215,0,.12)}
+.dot.fail{background:rgba(255,80,80,.08);border-color:rgba(255,80,80,.05)}
+.dot.cur{background:rgba(200,100,255,.15);border-color:rgba(200,100,255,.1)}
+.artifact{background:rgba(255,215,0,.03);border:1px solid rgba(255,215,0,.06);border-radius:10px;padding:8px;margin:.4rem 0;font-size:.72rem;color:rgba(255,215,0,.4);line-height:1.4}
+.world-icon{font-size:1.8rem;margin-bottom:.1rem}
+.stage-info{font-size:.6rem;color:rgba(255,255,255,.08);margin-bottom:.4rem}
+.event-title{color:rgba(255,255,255,.45);font-size:.8rem;margin-bottom:.3rem;line-height:1.3}
+.event-desc{color:rgba(255,255,255,.2);font-size:.68rem;margin-bottom:.5rem;line-height:1.4;font-style:italic}
+.choices{display:flex;flex-direction:column;gap:5px}
+.choice-btn{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.04);border-radius:12px;padding:10px 14px;color:rgba(255,255,255,.45);cursor:pointer;font-size:.78rem;transition:all .2s;font-family:inherit;text-align:left;line-height:1.3}
+.choice-btn:hover{background:rgba(200,100,255,.04);border-color:rgba(200,100,255,.1);color:rgba(255,255,255,.65);transform:translateX(3px)}
+.choice-btn:active{transform:scale(.97)}
+.result-box{margin-top:.4rem;padding:8px;border-radius:10px;font-size:.75rem;line-height:1.4;animation:fadeUp .4s}
+@keyframes fadeUp{0%{opacity:0;transform:translateY(6px)}100%{opacity:1;transform:translateY(0)}}
+.result-good{background:rgba(100,255,180,.025);border:1px solid rgba(100,255,180,.05);color:rgba(100,255,180,.4)}
+.result-bad{background:rgba(255,80,80,.025);border:1px solid rgba(255,80,80,.05);color:rgba(255,80,80,.4)}
+.result-legend{background:rgba(255,215,0,.025);border:1px solid rgba(255,215,0,.05);color:rgba(255,215,0,.45)}
+.result-next{margin-top:5px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.04);color:rgba(255,255,255,.35);padding:6px 24px;border-radius:16px;cursor:pointer;font-size:.72rem;font-family:inherit;transition:all .2s}
+.result-next:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.5)}
+.clue-box{background:rgba(200,100,255,.02);border-left:2px solid rgba(200,100,255,.08);padding:6px 10px;margin:.3rem 0;font-size:.65rem;color:rgba(200,100,255,.25);text-align:left;line-height:1.4}
+.boss-header{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:.2rem}
+.boss-icon{font-size:2rem}
+.boss-name{font-size:.95rem;font-weight:600;color:rgba(255,50,50,.45)}
+.boss-bar{height:6px;background:rgba(255,255,255,.03);border-radius:3px;overflow:hidden;margin-bottom:.3rem}
+.boss-fill{height:100%;background:linear-gradient(90deg,#ff6b6b,#ff2222);border-radius:3px;transition:width .3s}
+.skill-card{background:rgba(255,255,255,.01);border:1px solid rgba(255,255,255,.025);border-radius:8px;padding:6px 8px;margin-bottom:4px;text-align:left;font-size:.68rem;line-height:1.3}
+.skill-name{font-weight:600;font-size:.72rem;color:rgba(255,100,100,.5)}
+.skill-desc{color:rgba(255,255,255,.25);margin-top:2px;font-size:.65rem}
+.log{max-height:150px;overflow-y:auto;text-align:left;margin:.3rem 0;padding:5px 7px;background:rgba(0,0,0,.15);border-radius:8px;font-size:.68rem;line-height:1.4}
+.log::-webkit-scrollbar{width:2px}
+.log::-webkit-scrollbar-thumb{background:rgba(255,255,255,.03);border-radius:2px}
+.log-line{padding:2px 0;border-bottom:1px solid rgba(255,255,255,.008)}
+.log-line.dmg{color:rgba(255,80,80,.45)}
+.log-line.heal{color:rgba(100,255,180,.35)}
+.log-line.special{color:rgba(255,200,100,.35)}
+.log-line.pas{color:rgba(200,150,255,.35)}
+.fight-btn{background:rgba(255,50,50,.05);border:1px solid rgba(255,50,50,.08);color:rgba(255,50,50,.45);padding:8px 26px;border-radius:18px;cursor:pointer;font-size:.8rem;font-family:inherit}
+.fight-btn:hover{background:rgba(255,50,50,.08)}
+.fight-btn:disabled{opacity:.3;cursor:not-allowed}
+.revive-btn{background:rgba(255,215,0,.05);border:1px solid rgba(255,215,0,.08);color:rgba(255,215,0,.45);padding:8px 18px;border-radius:18px;cursor:pointer;font-size:.78rem;font-family:inherit}
+.revive-btn:hover{background:rgba(255,215,0,.08)}
+.end-title{font-size:1.2rem;margin-bottom:.2rem}
+.end-title.win{color:rgba(100,255,180,.45)}
+.end-title.lose{color:rgba(255,50,50,.45)}
+.end-sub{font-size:.75rem;color:rgba(255,255,255,.2);line-height:1.3;margin-bottom:.3rem}
+.btn{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.04);color:rgba(255,255,255,.35);padding:8px 26px;border-radius:22px;cursor:pointer;font-size:.8rem;transition:all .2s;font-family:inherit;z-index:1}
+.btn:hover{background:rgba(200,100,255,.04);border-color:rgba(200,100,255,.08);color:rgba(255,255,255,.5)}
+.btn:active{transform:scale(.96)}
+.btn-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:.2rem}
+.btn-home{border-color:rgba(255,215,0,.06);color:rgba(255,215,0,.3);padding:6px 16px;font-size:.7rem}
+.btn-home:hover{border-color:rgba(255,215,0,.12);color:rgba(255,215,0,.5)}
+.stats-line{color:rgba(255,255,255,.05);font-size:.58rem;margin-top:.5rem;z-index:1}
+.stats-line span{color:rgba(255,255,255,.12)}
+.footer{color:rgba(255,255,255,.03);font-size:.5rem;margin-top:.8rem}
+@media(max-width:480px){.card{padding:.8rem}.choice-btn{font-size:.74rem;padding:9px 12px}}
+</style></head><body><div id="stars"></div><div class="container">
+<h1>🌀 灵魂监牢</h1><div class="sub">规则怪谈 · 选错一步 · 万劫不复</div>
+<div class="card" id="card">
+<div class="hp-bar"><div class="hp-fill" id="hpFill" style="width:100%"></div><span class="hp-text" id="hpText">100/100</span></div>
+<div class="dot-bar" id="dotBar"></div>
+<div id="startView" style="padding:1.5rem 0"><div style="font-size:2.2rem;margin-bottom:.3rem">🧠</div>
+<div style="color:rgba(255,255,255,.08);font-size:.75rem;line-height:1.4">你在一座废弃研究所中醒来<br>失去了所有记忆<br>只有沿着规则走对每一步——你才能活着出去</div>
+<div style="margin-top:.6rem;font-size:.65rem;color:rgba(255,215,0,.15)">💀 第一周目几乎必死 · 收集神器才能逆转</div></div>
+<div id="roomView" style="display:none"><div class="stage-info"><span id="blockInfo">第1章</span> · <span id="roomNum">1</span>/20</div>
+<div class="world-icon" id="roomIcon">🚪</div><div class="event-title" id="roomTitle">醒来</div><div class="event-desc" id="roomDesc"></div>
+<div id="clueBox"></div><div class="choices" id="choices"></div><div id="roomResult"></div></div>
+<div id="bossView" style="display:none">
+<div class="boss-header"><span class="boss-icon">👹</span><span class="boss-name">灵魂烙印者</span></div>
+<div class="boss-bar"><div class="boss-fill" id="bossFill" style="width:100%"></div></div>
+<div id="bossIntro"></div><div id="bossSkills"></div><div class="log" id="log"></div><div id="fightZone"></div><div id="rewindZone"></div></div>
+<div id="endView" style="display:none"><div class="end-title" id="endTitle"></div><div class="end-sub" id="endSub"></div><div class="end-gear" id="endGear"></div></div></div>
+<div class="btn-row">
+<button class="btn" id="startBtn" onclick="startRun()">🌀 进入监牢</button>
+<button class="btn btn-home" onclick="location.href='index.html'">🏠 主页</button></div>
+<div class="stats-line">通关 <span id="winCount">0</span> · 死亡 <span id="loseCount">0</span> · 轮回 <span id="loopCount">1</span></div>
+<div class="footer">空格 = 继续</div></div>
+<script>
+for(let i=0;i<40;i++){const s=document.createElement('div');s.className='star';s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';s.style.setProperty('--d',(1.5+Math.random()*3)+'s');s.style.animationDelay=Math.random()*3+'s';document.getElementById('stars').appendChild(s)}
+function r(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+function pick(a){return a[r(0,a.length-1)]}
+
+// 20个规则怪谈房间（5章×4间）
+const CHAPTERS=[{name:'第一章：醒来',icon:'🚪'},{name:'第二章：探索',icon:'🔦'},{name:'第三章：追猎',icon:'👁️'},{name:'第四章：真相',icon:'📜'},{name:'第五章：逃离',icon:'🚀'}];
+const ROOMS=[
+{title:'01 · 意识苏醒',desc:'铁床上醒来，头痛欲裂。墙上贴着一张泛黄的纸条。',clue:'「规则一：不要相信你看到的东西」',choices:[{label:'下床检查房间'},{label:'抬头盯着灯看'},{label:'闭眼继续躺着'}],c:0},
+{title:'02 · 铁门',desc:'门虚掩着，走廊两侧各有一个房间，尽头有个人影。',clue:'「规则二：走廊尽头没有人」',choices:[{label:'走进左侧房间'},{label:'走进右侧房间'},{label:'走向尽头的人影'}],c:0},
+{title:'03 · 镜子房间',desc:'桌上放着日记。镜中你的倒影在笑——而你并没有笑。',clue:'「不要照镜子。那里面不是你。」',choices:[{label:'拿起日记阅读'},{label:'走到镜子前'},{label:'后退离开'}],c:0},
+{title:'04 · 日记',desc:'日记记载了研究所的真相——灵魂实验。出口在食堂后面。',clue:'',choices:[{label:'前往食堂'},{label:'继续搜房间'},{label:'烧掉日记'}],c:0},
+{title:'05 · 食堂',desc:'腐烂的食物。角落有台自动售货机，屏幕闪着微光。',clue:'屏幕：「输入员工代码」旁边贴着：0742',choices:[{label:'输入0742'},{label:'检查腐烂食物'},{label:'搜索后厨'}],c:0},
+{title:'06 · 地图',desc:'售货机吐出水和饼干。弹出了研究所地图。',clue:'地图上标记了"安全"和"⚠绝对不要进入"',choices:[{label:'去安全屋'},{label:'去禁入房间'},{label:'继续研究地图'}],c:0},
+{title:'07 · 安全屋',desc:'虹膜锁打开。墙上有防暴服和手枪。',clue:'防暴服标签：「可抵御一次致命攻击」',choices:[{label:'全拿上'},{label:'只拿手枪'},{label:'只拿防暴服'}],c:0},
+{title:'08 · 脚步声',desc:'沉重的脚步声靠近。铁门拦住去路。',clue:'地上有块松动的地板',choices:[{label:'躲地板下'},{label:'躲门后阴影'},{label:'拔枪迎战'}],c:0},
+{title:'09 · 通风管',desc:'岔路口：左边有人声，右边有冷风。',clue:'冷风=出口。人声=陷阱或幸存者。',choices:[{label:'爬向左'},{label:'爬向右'},{label:'停下细听'}],c:1},
+{title:'10 · 地下车库',desc:'一辆吉普车亮着灯。门口有个人形轮廓。',clue:'车钥匙插着。人形一动不动。',choices:[{label:'冲上车开走'},{label:'绕到背后看清'},{label:'退回管道'}],c:1},
+{title:'11 · 实验室',desc:'瓶瓶罐罐，一份实验报告。',clue:'报告：「灵魂烙印·第三阶段——所有受试者5分钟内死亡」',choices:[{label:'阅读报告'},{label:'收集化学品'},{label:'砸设备'}],c:0},
+{title:'12 · 我是谁',desc:'你是第74号实验品。前73个都死了。你活了下来。',clue:'手写：「74号记忆无法完全清除」',choices:[{label:'带走报告'},{label:'搜办公室找逃生路线'},{label:'放火烧实验室'}],c:1},
+{title:'13 · 记忆闪回',desc:'头痛。你曾是这里的研究员。你发现了真相，被袭击了。',clue:'你想起了秘密通道的位置',choices:[{label:'前往秘密通道'},{label:'回档案室'},{label:'回忆更多'}],c:0},
+{title:'14 · 秘密通道',desc:'书柜后的楼梯。墙壁上符文发着红光。',clue:'这是灵魂烙印的封印阵',choices:[{label:'走下去'},{label:'破坏符文'},{label:'退回去'}],c:0},
+{title:'15 · 烙印核心',desc:'巨大机器悬浮着黑色球体，无数人脸在尖叫。',clue:'侧面有紧急关闭按钮。按后30秒必须离开。',choices:[{label:'按下按钮'},{label:'射击球体'},{label:'研究机器'}],c:0},
+{title:'16 · 苏醒',desc:'球体碎裂。警报响起。「第74号，我等了你很久。」',clue:'它已苏醒。逃向天台！',choices:[{label:'冲向天台'},{label:'找武器'},{label:'和它对话'}],c:0},
+{title:'17 · 楼梯间',desc:'每上一层温度降一度。墙壁结霜。脑中低语。',clue:'它越来越近了',choices:[{label:'拼命向上跑'},{label:'每层设路障'},{label:'躲进房间'}],c:0},
+{title:'18 · 14楼',desc:'铁门锁住。骸骨手里攥着纸条。',clue:'「密码是我的实验编号#07」',choices:[{label:'输入07'},{label:'搜索骸骨'},{label:'踹门'}],c:0},
+{title:'19 · 天台',desc:'直升机已启动。门后一只手伸了出来。',clue:'你还有三秒',choices:[{label:'跳上直升机'},{label:'回头面对'},{label:'拍照留证'}],c:0},
+{title:'20 · 升空',desc:'直升机离开楼顶。地上的影子在朝你挥手。你闭上眼——又回到了铁床上。但你已经不是原来的你了。',clue:'—— 你集齐了所有规则 ——',choices:[{label:'走向Boss战'}],c:0},
+];
+
+const ARTIFACTS=[
+{name:'🧪 记忆清除器',desc:'每回合自动清除1层记忆烙印',key:'erase'},
+{name:'🛡️ 灵魂屏障',desc:'Boss伤害减少40%',key:'shield'},
+{name:'⚡ 因果律核心',desc:'攻击力×3，无视防御',key:'causality'},
+{name:'⏳ 时空锚点',desc:'时间回溯时Boss无法追踪你',key:'anchor'},
+];
+
+const BOSS={name:'灵魂烙印者',icon:'👹',hp:800,atk:35,bdef:30,
+skills:[
+{name:'🔥 灵魂灼烧',lv:'世界',desc:'每层「记忆烙印」每回合造成8点伤害。层数不清除会一直烧下去。'},
+{name:'🧠 记忆植入',lv:'宇宙',desc:'每2回合叠加1层烙印。时间回溯也无法清除！只有记忆清除器可以对抗。'},
+{name:'👁️ 灵魂追踪',lv:'宇宙',desc:'死亡后时间回溯时，50%概率Boss堵门。无记忆清除器则即死！'},
+{name:'💥 烙印爆发',lv:'宇宙',desc:'烙印≥4层时爆发，清空烙印并对你造成50点伤害 + 封印一件装备2回合。'},
+{name:'🔄 无尽轮回',lv:'多元宇宙',desc:'每5回合回复100HP。不速战速决就会被拖死。'},
+]};
+
+let run=null,st={wins:0,loses:0},loop=1,perf=[false,false,false,false];
+
+function startRun(){
+  if(run&&run.rw>0){if(confirm('时间回溯？（Boss的记忆植入和灵魂追踪依然存在）\n回溯后回到Boss战')){rwD();return;}else return;}
+  perf=[false,false,false,false];
+  const corr=ROOMS.map(()=>r(0,2));
+  run={ridx:0,gear:[],hp:100,mhp:100,burn:0,rw:1,erase:0,arts:[],pts:0,blocked:false,fin:false,loop:loop,atk:0,def:0,chCorrect:[0,0,0,0,0],chTotal:[0,0,0,0,0],corrects:corr};
+  document.getElementById('startView').style.display='none';
+  document.getElementById('roomView').style.display='block';
+  upHP();upDots();shR();
+}
+
+function shR(){
+  if(!run||run.fin)return;
+  const r=run.ridx;
+  if(r>=ROOMS.length){stBoss();return;}
+  const rm=ROOMS[r],ch=Math.floor(r/4);
+  document.getElementById('roomIcon').textContent=CHAPTERS[ch].icon;
+  document.getElementById('blockInfo').textContent=CHAPTERS[ch].name;
+  document.getElementById('roomNum').textContent=r+1;
+  document.getElementById('roomTitle').textContent=rm.title;
+  document.getElementById('roomDesc').textContent=rm.desc;
+  document.getElementById('clueBox').innerHTML=rm.clue?`<div class="clue-box">📌 ${rm.clue}</div>`:'';
+  const c=document.getElementById('choices');c.innerHTML='';
+  rm.choices.forEach((ch,i)=>{
+    const btn=document.createElement('button');btn.className='choice-btn';
+    btn.innerHTML=ch.label;btn.onclick=()=>pickC(i,rm.c,ch);
+    c.appendChild(btn);
+  });
+  document.getElementById('roomResult').innerHTML='';upDots();
+}
+
+function pickC(chosen,correct,chData){
+  const btns=document.querySelectorAll('.choice-btn');
+  btns.forEach(b=>b.disabled=true);
+  const rr=document.getElementById('roomResult');
+  const ch=Math.floor(run.ridx/4);
+  run.chTotal[ch]++;
+  const correctIdx=run.corrects[run.ridx];
+  if(chosen===correctIdx){
+    run.pts++;run.chCorrect[ch]++;
+    const pool=run.ridx>=10?['common','world','cosmic']:['common','world'];
+    const lv=pick(pool);
+    const w=Math.random()<0.5;
+    const item=w?gW([lv]):gA([lv]);
+    run.gear.push(item);
+    rr.innerHTML=`<div class="result-box result-good">✅ 正确。获得：${item.label}</div>`;
+    calc();
+  } else {
+    const d=r(10,20);
+    run.hp=Math.max(0,run.hp-d);
+    rr.innerHTML=`<div class="result-box result-bad">❌ 规则不容违背。受到 ${d} 点伤害。</div>`;upHP();
+    run.pts=Math.max(0,run.pts-1);
+    if(run.hp<=0){endRun(false,'倒在了第'+(run.ridx+1)+'关');return;}
+  }
+  rr.innerHTML+=`<button class="result-next" onclick='nR()'>继续 →</button>`;upDots();
+}
+
+function nR(){
+  if(!run||run.hp<=0||run.fin)return;
+  const old=Math.floor(run.ridx/4);
+  run.ridx++;
+  const nw=Math.floor(run.ridx/4);
+  if(nw>old&&nw<5){
+    // 检查这章是否全对
+    if(run.chCorrect[old]>=4&&run.chTotal[old]>=4){
+      perf[old]=true;
+      const art=ARTIFACTS[old];
+      if(!run.arts.includes(art.key)){
+        run.arts.push(art.key);
+        const rr=document.getElementById('roomResult');
+        rr.innerHTML=`<div class="result-box result-legend">🏆 全对！获得神器：${art.name}<br><span style="font-size:.65rem">${art.desc}</span></div>`+
+          `<button class="result-next" onclick='nR()'>继续 →</button>`;
+        upDots();
+        if(run.arts.length>=4){
+          rr.innerHTML+=`<div class="artifact"><strong>👑 规则之主已觉醒！</strong><br>四神器集齐——所有被动效果翻倍</div>`;
+        }
+        return;
+      }
+    }
+  }
+  shR();
+}
+
+function calc(){
+  let a=0,d=0;
+  run.gear.forEach(g=>{if(g.t==='w')a+=g.a||0;if(g.t==='a')d+=g.d||0;});
+  if(run.arts.includes('causality'))a*=3;
+  run.atk=a;run.def=d;upHP();
+}
+
+function upHP(){const p=(run.hp/run.mhp*100).toFixed(1);
+  document.getElementById('hpFill').style.width=p+'%';document.getElementById('hpText').textContent=run.hp+'/'+run.mhp;
+}
+function upDots(){
+  const bar=document.getElementById('dotBar');
+  bar.innerHTML=ROOMS.map((_,i)=>{
+    let cls='dot';
+    if(i<run.ridx){const ch=Math.floor(i/4);cls+=run.chCorrect[ch]>=4&&run.chTotal[ch]>=4?' perfect':' done';}
+    if(i===run.ridx)cls+=' cur';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+}
+
+function gW(pool){const lv=pick(pool||['common']);
+  const nms={common:['铁管','撬棍','消防斧'],world:['精钢剑','烈焰刀'],cosmic:['等离子炮','虚空刃'],multi:['因果律武器']};
+  const n=pick(nms[lv]||nms.common);
+  const b=lv==='common'?r(3,7):lv==='world'?r(10,18):lv==='cosmic'?r(25,40):60;
+  return{t:'w',name:n,a:b,label:`🗡️ ${n} ATK+${b}`};
+}
+function gA(pool){const lv=pick(pool||['common']);
+  const nms={common:['皮夹克','铁锅盖'],world:['锁子甲','附魔披风'],cosmic:['能量盾','虚空甲'],multi:['维度屏障']};
+  const n=pick(nms[lv]||nms.common);
+  const b=lv==='common'?r(2,5):lv==='world'?r(8,14):lv==='cosmic'?r(20,35):50;
+  return{t:'a',name:n,d:b,label:`🛡️ ${n} DEF+${b}`};
+}
+
+// Boss战
+function stBoss(){
+  document.getElementById('roomView').style.display='none';document.getElementById('bossView').style.display='block';
+  run.bHp=BOSS.hp;run.bMhp=BOSS.hp;run.fR=0;run.inv=false;run.win=false;
+  document.getElementById('bossIntro').innerHTML=`<div style="background:rgba(255,50,50,.03);border-radius:10px;padding:8px;margin-bottom:.4rem;font-size:.7rem;color:rgba(255,255,255,.3);line-height:1.4">
+  <strong style="color:rgba(255,50,50,.5)">👹 灵魂烙印者</strong><br>
+  HP: ${BOSS.hp} · ATK: ${BOSS.atk} · DEF: ${BOSS.bdef}<br>
+  ${run.arts.length}/4 神器已激活</div>`;
+  document.getElementById('bossSkills').innerHTML='<div style="font-size:.6rem;color:rgba(255,255,255,.08);margin-bottom:.3rem">━ 技能 ━</div>'+
+    BOSS.skills.map(s=>`<div class="skill-card"><div class="skill-name">${s.name}</div><div class="skill-desc">${s.desc}</div></div>`).join('');
+  document.getElementById('log').innerHTML='';
+  if(run.arts.includes('erase'))document.getElementById('log').innerHTML+=`<div class="log-line pas">🧪 记忆清除器生效——每回合自动清除1层烙印</div>`;
+  if(run.arts.includes('shield'))document.getElementById('log').innerHTML+=`<div class="log-line pas">🛡️ 灵魂屏障生效——Boss伤害减少40%</div>`;
+  if(run.arts.includes('causality'))document.getElementById('log').innerHTML+=`<div class="log-line pas">⚡ 因果律核心生效——ATK×3，无视防御</div>`;
+  if(run.arts.includes('anchor'))document.getElementById('log').innerHTML+=`<div class="log-line pas">⏳ 时空锚点生效——Boss无法追踪你</div>`;
+  document.getElementById('fightZone').innerHTML=`<button class="fight-btn" onclick="fB()">⚔️ 攻击（第1回合）</button>`;
+}
+
+function fB(){
+  if(!run||run.fin)return;
+  document.querySelector('.fight-btn').disabled=true;
+  run.fR++;let log=document.getElementById('log');
+  let pA=run.atk,pD=run.def,bA=BOSS.atk,bD=BOSS.bdef;
+  const rnd=run.fR;
+
+  // 灵魂屏障
+  if(run.arts.includes('shield')){bA=Math.round(bA*0.6);}
+  
+  // 记忆植入(每2回合)
+  if(rnd%2===0&&!run.arts.includes('erase')){run.burn++;}
+  else if(rnd%2===0&&run.arts.includes('erase')){log.innerHTML+=`<div class="log-line pas">🧪 记忆清除器抵抗了记忆植入</div>`;}
+  
+  // 灵魂灼烧
+  if(run.burn>0&&!run.arts.includes('erase')){
+    const bd=run.burn*8;log.innerHTML+=`<div class="log-line dmg">🔥 灵魂灼烧！受到 ${bd} 点伤害（${run.burn}层）</div>`;
+    run.hp-=bd;
+  } else if(run.burn>0&&run.arts.includes('erase')){
+    run.burn=Math.max(0,run.burn-1);
+    log.innerHTML+=`<div class="log-line pas">🧪 记忆清除器清除了1层烙印（剩余${run.burn}层）</div>`;
+  }
+  
+  // 烙印爆发
+  if(run.burn>=4){log.innerHTML+=`<div class="log-line special">💥 烙印爆发！受到50点伤害！</div>`;run.hp-=50;run.burn=0;}
+  
+  // 无尽轮回
+  if(rnd%5===0){run.bHp=Math.min(run.bMhp,run.bHp+100);log.innerHTML+=`<div class="log-line heal">🔄 无尽轮回！Boss回复100HP</div>`;}
+
+  // 玩家攻击
+  let dmg=Math.max(0,Math.round(pA-bD*0.2));
+  if(run.arts.includes('causality')){bD=0;dmg=pA;}
+  run.bHp-=dmg;
+  log.innerHTML+=`<div class="log-line dmg">⚔️ 你对Boss造成 ${dmg} 点伤害（剩余HP: ${Math.max(0,run.bHp)}）</div>`;
+
+  // Boss攻击
+  let bDmg=Math.max(0,Math.round(bA-pD*0.2));
+  run.hp-=bDmg;
+  log.innerHTML+=`<div class="log-line dmg">💥 Boss造成 ${bDmg} 点伤害（你剩余HP: ${Math.max(0,run.hp)}）</div>`;
+
+  const bp=(run.bHp/run.bMhp*100).toFixed(1);
+  document.getElementById('bossFill').style.width=bp+'%';
+  log.scrollTop=log.scrollHeight;
+
+  if(run.bHp<=0){endRun(true);return;}
+  if(run.hp<=0){hD();return;}
+  if(run.fR>=40){endRun(false,'40回合到了——你被拖入了永恒轮回');return;}
+  document.querySelector('.fight-btn').disabled=false;
+  document.getElementById('fightZone').innerHTML=`<button class="fight-btn" onclick="fB()">⚔️ 攻击（第${rnd+1}回合）</button>`;
+}
+
+function hD(){
+  const z=document.getElementById('fightZone');
+  if(run.rw>0){z.innerHTML=`<div style="color:rgba(255,255,255,.2);margin:.3rem;font-size:.75rem">💀 你倒下了……</div>
+    <button class="revive-btn" onclick="rwD()">⏳ 时间回溯（剩${run.rw}次）</button>
+    <button class="fight-btn" style="background:rgba(255,255,255,.01);padding:5px 16px;font-size:.65rem;margin-top:5px" onclick="endRun(false,'死在了Boss战中')">接受死亡</button>`;
+  } else {setTimeout(()=>endRun(false,'没有回溯次数了'),1000);}
+}
+
+function rwD(){
+  run.rw--;run.hp=Math.round(run.mhp*0.5);run.fin=false;
+  if(run.arts.includes('anchor')){run.blocked=false;}
+  else if(Math.random()<0.5){run.blocked=true;}
+  if(run.blocked&&run.erase<=0&&!run.arts.includes('erase')){
+    endRun(false,'Boss堵住了你的回溯！你没有记忆清除手段……被扼杀在轮回中');
+    return;
+  }
+  if(run.blocked){
+    run.erase--;run.blocked=false;run.burn=0;
+  }
+  run.fR=0;run.bHp=run.bMhp;run.burn=0;
+  // 回到第一关，重新打
+  run.ridx=0;run.gear=[];run.hp=run.mhp;
+  document.getElementById('bossView').style.display='none';
+  document.getElementById('roomView').style.display='block';
+  upHP();upDots();shR();
+}
+
+function endRun(win,msg){
+  run.fin=true;
+  document.getElementById('bossView').style.display='none';
+  document.getElementById('roomView').style.display='none';
+  document.getElementById('endView').style.display='block';
+  const t=document.getElementById('endTitle'),s=document.getElementById('endSub'),g=document.getElementById('endGear');
+  if(win){
+    t.className='end-title win';t.textContent='🎉 通关！';s.textContent='你击败了灵魂烙印者，从灵魂监牢中逃了出来。';
+    st.wins++;loop++;document.getElementById('loopCount').textContent=loop;
+  } else {
+    t.className='end-title lose';t.textContent='💀 陨落';s.textContent=msg||'你倒在了路上。下次再来。';st.loses++;
+  }
+  g.innerHTML='';
+  if(run.gear.length)g.innerHTML+=`<div style="margin-bottom:.2rem">装备（${run.gear.length}件）</div>`+run.gear.map(x=>'<div>'+x.label+'</div>').join('');
+  if(run.arts.length)g.innerHTML+=`<div style="margin-top:.3rem">神器：${run.arts.join(' · ')}</div>`;
+  if(run.arts.length>=4)g.innerHTML+=`<div class="artifact">👑 <strong>规则之主</strong> — 你掌握了所有规则，灵魂监牢再也关不住你了</div>`;
+  document.getElementById('winCount').textContent=st.wins;
+  document.getElementById('loseCount').textContent=st.loses;
+  document.getElementById('startView').style.display='block';
+  document.getElementById('startBtn').textContent='🔄 再来一次';
+}
+document.addEventListener('keydown',e=>{if(e.key===' '){e.preventDefault();const n=document.querySelector('.result-next');if(n)n.click();}});
+</script></body></html>

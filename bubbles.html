@@ -180,6 +180,7 @@
   <button onclick="clearAll()">🧹 清空</button>
   <button onclick="moreBubbles(10)">🎈 +10</button>
   <button onclick="autoPop()">🤖 自动</button>
+  <button onclick="location.href='index.html'" style="border-color:rgba(255,215,0,.15);color:rgba(255,215,0,.6)">🏠 主页</button>
 </div>
 
 <script>
@@ -202,6 +203,20 @@ let combo = 0;
 let lastPop = 0;
 let autoTimer = null;
 let bubbleId = 0;
+let popSound = null;
+// 页面加载后预加载音效
+window.addEventListener('load', () => {
+  popSound = new Audio('气泡破裂声06_爱给网_aigei_com.mp3');
+  popSound.preload = 'auto';
+});
+
+function playPopSound() {
+  if (!popSound) return;
+  const snd = popSound.cloneNode(true);
+  snd.volume = 0.5;
+  snd.play().catch(() => {});
+  setTimeout(() => { try { snd.pause(); snd.currentTime = 0; } catch {} }, 500);
+}
 
 function random(min, max) { return Math.random() * (max - min) + min; }
 
@@ -244,6 +259,9 @@ function createBubble() {
 
 function popBubble(el, e) {
   if (!el || !el.parentNode) return;
+
+  // 音效
+  playPopSound();
 
   const rect = el.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
@@ -361,11 +379,14 @@ function autoPop() {
   document.querySelector('.controls button:last-child').style.color = '#ffd700';
   autoTimer = setInterval(() => {
     const bubbles = document.querySelectorAll('.bubble');
-    if (bubbles.length > 0) {
+    const count = Math.min(4, bubbles.length);
+    for (let i = 0; i < count; i++) {
       const b = bubbles[Math.floor(Math.random() * bubbles.length)];
-      popBubble(b, {});
+      if (b) popBubble(b, {});
     }
-  }, 400);
+    // 疯狂补泡泡
+    for (let i = 0; i < 2; i++) createBubble();
+  }, 80);
 }
 
 // 初始生成
