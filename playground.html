@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>赛博游乐场 🎪</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100svh;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    font-family: system-ui, 'Segoe UI', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    overflow: hidden;
+  }
+  h1 {
+    color: rgba(255,255,255,.85);
+    font-size: 2rem;
+    letter-spacing: .2em;
+    font-weight: 300;
+    margin-bottom: .5rem;
+  }
+  .sub {
+    color: rgba(255,255,255,.4);
+    font-size: .9rem;
+    margin-bottom: 3rem;
+  }
+  .grid {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 900px;
+  }
+  .card {
+    width: 240px;
+    height: 280px;
+    background: rgba(255,255,255,.03);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 24px;
+    text-decoration: none;
+    color: rgba(255,255,255,.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 2rem;
+    transition: all .3s cubic-bezier(.34,1.56,.64,1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    opacity: 0;
+    transition: opacity .3s;
+    border-radius: inherit;
+  }
+  .card:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(255,215,0,.2);
+  }
+  .card:hover .icon { transform: scale(1.2) rotate(-5deg); }
+  .card .icon {
+    font-size: 4.5rem;
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  .card .name {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: rgba(255,255,255,.8);
+  }
+  .card .desc {
+    font-size: .78rem;
+    color: rgba(255,255,255,.35);
+    text-align: center;
+    line-height: 1.4;
+  }
+  .card .hotkey {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    font-size: .6rem;
+    background: rgba(255,255,255,.06);
+    padding: 2px 8px;
+    border-radius: 6px;
+    color: rgba(255,255,255,.2);
+  }
+  .card[data-c="0"]:hover { box-shadow: 0 20px 60px rgba(255,215,0,.1); }
+  .card[data-c="1"]:hover { box-shadow: 0 20px 60px rgba(100,200,255,.1); }
+  .card[data-c="2"]:hover { box-shadow: 0 20px 60px rgba(255,150,200,.1); }
+
+  .footer {
+    margin-top: 3rem;
+    color: rgba(255,255,255,.15);
+    font-size: .7rem;
+    letter-spacing: .1em;
+  }
+  .footer kbd {
+    background: rgba(255,255,255,.04);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: .7rem;
+  }
+  @media (max-width: 600px) {
+    .card { width: 180px; height: 220px; }
+    .card .icon { font-size: 3rem; }
+    h1 { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<h1>🎪 赛博游乐场</h1>
+<div class="sub">选一个玩吧 · 也可以按数字键 1 2 3</div>
+
+<div class="grid">
+  <a class="card" data-c="0" href="index.html">
+    <span class="hotkey">1</span>
+    <span class="icon">🙏</span>
+    <span class="name">电子木鱼</span>
+    <span class="desc">敲木鱼 · 攒功德 · 赛博禅修<br>功德越多段位越高</span>
+  </a>
+  <a class="card" data-c="1" href="fortune.html">
+    <span class="hotkey">2</span>
+    <span class="icon">🔮</span>
+    <span class="name">赛博算命</span>
+    <span class="desc">摇一签 · 看今日运势<br>事业财运桃花全都有</span>
+  </a>
+  <a class="card" data-c="2" href="cats.html">
+    <span class="hotkey">3</span>
+    <span class="icon">🐱</span>
+    <span class="name">无限猫猫</span>
+    <span class="desc">召唤猫猫 · 收集图鉴<br>每只都不一样</span>
+  </a>
+</div>
+
+<div class="footer">
+  <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> 快速切换 &nbsp;·&nbsp; 每个页面都支持 <kbd>空格</kbd>
+</div>
+
+<script>
+  // 键盘快捷键
+  document.addEventListener('keydown', e => {
+    const links = document.querySelectorAll('.card');
+    if (e.key === '1') links[0]?.click();
+    if (e.key === '2') links[1]?.click();
+    if (e.key === '3') links[2]?.click();
+  });
+</script>
+</body>
+</html>

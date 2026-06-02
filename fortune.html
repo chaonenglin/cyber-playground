@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>赛博算命 · 今日离谱运势</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100svh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #1a0a2e, #2d1b4e, #0f0c29);
+    font-family: system-ui, 'Segoe UI', sans-serif;
+    touch-action: manipulation;
+  }
+  .container { text-align: center; position: relative; }
+  .title {
+    color: rgba(255,255,255,.8);
+    font-size: 1.4rem;
+    letter-spacing: .3em;
+    margin-bottom: 2rem;
+  }
+  .stick-wrap {
+    position: relative;
+    cursor: pointer;
+    margin: 0 auto;
+    width: 200px; height: 260px;
+  }
+  .stick {
+    width: 100%; height: 100%;
+    background: linear-gradient(180deg, #e8c46a, #b8842a 60%, #7a5210);
+    border-radius: 20px 20px 8px 8px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.5), inset 0 -4px 10px rgba(0,0,0,.3), inset 0 4px 10px rgba(255,215,100,.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+    position: relative;
+    overflow: hidden;
+  }
+  .stick::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 20px,
+      rgba(0,0,0,.05) 20px,
+      rgba(0,0,0,.05) 21px
+    );
+    border-radius: inherit;
+  }
+  .stick.shake {
+    animation: shake .6s cubic-bezier(.36,.07,.19,.97);
+  }
+  @keyframes shake {
+    0%, 100% { transform: rotate(0); }
+    10% { transform: rotate(15deg); }
+    20% { transform: rotate(-12deg); }
+    30% { transform: rotate(10deg); }
+    40% { transform: rotate(-8deg); }
+    50% { transform: rotate(6deg); }
+    60% { transform: rotate(-4deg); }
+    70% { transform: rotate(2deg); }
+  }
+  .stick .label {
+    position: relative;
+    z-index: 1;
+    color: rgba(0,0,0,.3);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    writing-mode: vertical-lr;
+    text-orientation: upright;
+  }
+  .hint {
+    color: rgba(255,255,255,.4);
+    font-size: .8rem;
+    margin-top: 1.5rem;
+    letter-spacing: .1em;
+  }
+
+  .result-card {
+    display: none;
+    margin-top: 2rem;
+    background: rgba(255,255,255,.04);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,215,0,.1);
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 420px;
+    margin-left: auto; margin-right: auto;
+    animation: fadeUp .6s ease-out;
+  }
+  .result-card.show { display: block; }
+  @keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(30px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .fortune-level {
+    font-size: 3rem;
+    margin-bottom: .5rem;
+  }
+  .fortune-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #ffd700;
+    text-shadow: 0 0 30px rgba(255,215,0,.2);
+    margin-bottom: .3rem;
+  }
+  .fortune-sub {
+    color: rgba(255,255,255,.6);
+    font-size: .9rem;
+    margin-bottom: 1.5rem;
+  }
+  .fortune-item {
+    color: rgba(255,255,255,.7);
+    font-size: .9rem;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .fortune-item:last-child { border: none; }
+  .fortune-item .emoji { font-size: 1.3rem; width: 28px; }
+  .fortune-item .tag {
+    font-size: .7rem;
+    background: rgba(255,215,0,.1);
+    padding: 2px 10px;
+    border-radius: 10px;
+    color: #ffd700;
+    white-space: nowrap;
+  }
+  .redo-btn {
+    margin-top: 1.5rem;
+    background: rgba(255,215,0,.08);
+    border: 1px solid rgba(255,215,0,.2);
+    color: #ffd700;
+    padding: 10px 32px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: .9rem;
+    transition: all .2s;
+  }
+  .redo-btn:hover {
+    background: rgba(255,215,0,.15);
+    box-shadow: 0 0 30px rgba(255,215,0,.1);
+  }
+  .particles {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: -1;
+  }
+  .particle {
+    position: absolute;
+    width: 4px; height: 4px;
+    background: rgba(255,215,0,.2);
+    border-radius: 50%;
+    animation: float linear infinite;
+  }
+  @keyframes float {
+    0% { transform: translateY(100vh) rotate(0); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+
+<div class="container">
+  <div class="title">🔮 赛博算命 <span style="opacity:.4">|</span> Cyber Fortune</div>
+
+  <div class="stick-wrap" id="stickWrap">
+    <div class="stick" id="stick">
+      <span class="label">求 签</span>
+    </div>
+  </div>
+  <div class="hint">点击签筒，摇一卦</div>
+
+  <div class="result-card" id="result">
+    <div class="fortune-level" id="fLevel">🌟</div>
+    <div class="fortune-title" id="fTitle">上上签</div>
+    <div class="fortune-sub" id="fSub">诸事皆宜，百无禁忌</div>
+    <div class="fortune-item"><span class="emoji">💼</span> <span id="fCareer">事业运</span> <span class="tag" id="fCareerTag">大吉</span></div>
+    <div class="fortune-item"><span class="emoji">💰</span> <span id="fMoney">财运</span> <span class="tag" id="fMoneyTag">中吉</span></div>
+    <div class="fortune-item"><span class="emoji">❤️</span> <span id="fLove">桃花运</span> <span class="tag" id="fLoveTag">小吉</span></div>
+    <div class="fortune-item"><span class="emoji">🍜</span> <span id="fFood">今日幸运食物</span></div>
+    <div class="fortune-item"><span class="emoji">💬</span> <span id="fAdvice" style="font-style:italic;">禅师说：...</span></div>
+    <button class="redo-btn" onclick="drawFortune()">🔮 再求一签</button>
+  </div>
+</div>
+
+<script>
+// ====== 随机粒子背景 ======
+for (let i = 0; i < 30; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  p.style.left = Math.random() * 100 + '%';
+  p.style.width = p.style.height = (2 + Math.random() * 4) + 'px';
+  p.style.animationDuration = (10 + Math.random() * 20) + 's';
+  p.style.animationDelay = (Math.random() * 10) + 's';
+  document.getElementById('particles').appendChild(p);
+}
+
+const levels = [
+  { emoji: '💀', title: '下下签', sub: '今日宜摸鱼，忌出门', weight: 5 },
+  { emoji: '😅', title: '下签', sub: '诸事不宜，建议躺平', weight: 10 },
+  { emoji: '🤔', title: '中平签', sub: '不好不坏，就是没劲', weight: 20 },
+  { emoji: '👍', title: '中签', sub: '还行吧，凑合过', weight: 25 },
+  { emoji: '🌟', title: '中上签', sub: '有点东西，今天能行', weight: 22 },
+  { emoji: '🎉', title: '上签', sub: '好运来了，挡都挡不住', weight: 12 },
+  { emoji: '👑', title: '上上签', sub: '天命之子！今天你无敌', weight: 5 },
+  { emoji: '🌈', title: '✨ 隐藏签 · 天选之人 ✨', sub: '佛祖给你开了VIP', weight: 1 },
+];
+
+const tags = ['大吉', '中吉', '小吉', '平平', '不宜', '???'];
+
+const careers = [
+  '代码零bug部署一次过 🐛', '老板今天不在 ☕', '需求不会变 🔒',
+  '会议全部取消 🎉', '被领导表扬 🌟', '方案一次过 ✅',
+  '同事请喝奶茶 🧋', '摸鱼一整天没被发现 🐟', '准时下班 ⏰',
+  'Git冲突全部自动解决 🤝', '找到藏了很久的bug 🎯',
+  'PR秒过无需修改 🚀', '隔壁工位不吧唧嘴了 👂',
+  '打印机没坏 🖨️', '茶水间有好吃的 🍪',
+];
+
+const moneys = [
+  '捡到五块钱 💵', '基金回本了 📈', '收到意外红包 🧧',
+  '买到打折好物 🛒', '加薪通知在路上 📬', '彩票中了小奖 🎫',
+  '朋友请客 🍽️', '退款到账 💰', '路边发现硬币 🪙',
+  '股票涨停 📊', '闲鱼卖出闲置 🛍️', '被退税了 📃',
+  '发工资了！（还没花掉就是赚到）💳',
+];
+
+const loves = [
+  '今天颜值+100% ✨', '偶遇旧人 🫢', '收到暧昧消息 💌',
+  '单身快乐 🎮', '对象突然很甜 🍯', '猫比对象乖 🐱',
+  '暗恋的人看了你一眼 👀', '今天不用相亲 😮‍💨',
+  '分手快乐 🎵', '表白成功率+20% 💕',
+  '已婚人士：今天不吵架 🏡',
+  '你的CP发糖了 🎊',
+];
+
+const foods = [
+  '🍜 牛肉面', '🥟 饺子', '🍕 披萨', '🌮 塔可', '🍣 寿司',
+  '🥘 火锅', '🍢 烧烤', '🌯 卷饼', '🥗 沙拉', '🍳 煎饼果子',
+  '🍛 咖喱饭', '🍝 意面', '🥐 可颂', '🧋 奶茶（全糖）',
+  '🍦 冰淇淋（可以当早餐）',
+];
+
+const advices = [
+  '饭吃七分饱，代码写七分好。',
+  '今天不适合做决定，适合决定不做。',
+  '累了就休息，bug又不会跑。',
+  '少刷手机，多刷... 算了你开心就好。',
+  '如果今天不开心，就假装开心，装着装着就真开心了。',
+  '不要和杠精争论，截图发朋友圈让大家笑。',
+  '今日人生哲学：来都来了。',
+  '睡前原谅一切，醒来就是... 周一。',
+  '所谓成长，就是把「我受不了了」变成「行吧」。',
+  '遇到困难就睡一觉，睡醒发现困难还在，但你有精神了。',
+  '种一棵树最好的时间是十年前，其次是... 点个外卖吧。',
+  '不要生气，生气给魔鬼留地步 —— 魔鬼可能比你过得好。',
+  '今日宜：深呼吸。不宜：深呼吸（会缺氧）。',
+];
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function weightedPick(items) {
+  const total = items.reduce((s, i) => s + i.weight, 0);
+  let r = Math.random() * total;
+  for (const item of items) {
+    r -= item.weight;
+    if (r <= 0) return item;
+  }
+  return items[0];
+}
+
+function drawFortune() {
+  const stick = document.getElementById('stick');
+  const wrap = document.getElementById('stickWrap');
+  const result = document.getElementById('result');
+
+  // 摇签动画
+  stick.classList.remove('shake');
+  void stick.offsetWidth;
+  stick.classList.add('shake');
+
+  result.classList.remove('show');
+
+  setTimeout(() => {
+    const level = weightedPick(levels);
+    const careerTag = pick(tags);
+    const moneyTag = pick(tags);
+    const loveTag = pick(tags);
+
+    document.getElementById('fLevel').textContent = level.emoji;
+    document.getElementById('fTitle').textContent = level.title;
+    document.getElementById('fSub').textContent = level.sub;
+    document.getElementById('fCareer').textContent = pick(careers);
+    document.getElementById('fCareerTag').textContent = careerTag;
+    document.getElementById('fMoney').textContent = pick(moneys);
+    document.getElementById('fMoneyTag').textContent = moneyTag;
+    document.getElementById('fLove').textContent = pick(loves);
+    document.getElementById('fLoveTag').textContent = loveTag;
+    document.getElementById('fFood').textContent = pick(foods);
+    document.getElementById('fAdvice').textContent = '🧘 ' + pick(advices);
+
+    result.classList.add('show');
+  }, 600);
+}
+
+// 点击摇签
+document.getElementById('stickWrap').addEventListener('click', drawFortune);
+
+// 空格键
+document.addEventListener('keydown', (e) => {
+  if (e.key === ' ') { e.preventDefault(); drawFortune(); }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>无限猫猫 · 赛博吸猫</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100svh;
+    background: linear-gradient(180deg, #1a1a2e, #16213e, #0f3460);
+    font-family: system-ui, 'Segoe UI', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem;
+    touch-action: manipulation;
+  }
+  h1 {
+    color: rgba(255,255,255,.8);
+    font-size: 1.4rem;
+    letter-spacing: .2em;
+    font-weight: 300;
+    margin-bottom: .3rem;
+  }
+  .subtitle {
+    color: rgba(255,255,255,.4);
+    font-size: .8rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .cat-zone {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    max-width: 800px;
+    min-height: 260px;
+    padding: 1rem;
+  }
+
+  .cat-card {
+    background: rgba(255,255,255,.04);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 20px;
+    padding: 20px 16px 16px;
+    width: 140px;
+    text-align: center;
+    animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+    transition: transform .2s, box-shadow .2s;
+    cursor: pointer;
+    position: relative;
+  }
+  .cat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,.3);
+  }
+  @keyframes popIn {
+    0% { opacity: 0; transform: scale(0) rotate(-10deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0); }
+  }
+  .cat-emoji {
+    font-size: 3.5rem;
+    line-height: 1.2;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .cat-name {
+    font-size: .8rem;
+    color: rgba(255,255,255,.7);
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+  .cat-bio {
+    font-size: .65rem;
+    color: rgba(255,255,255,.35);
+    line-height: 1.3;
+    margin-top: 4px;
+  }
+  .cat-rarity {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-size: .55rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(255,255,255,.06);
+    color: rgba(255,255,255,.3);
+  }
+
+  .btn-area {
+    display: flex;
+    gap: 12px;
+    margin-top: .5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .btn {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1);
+    color: rgba(255,255,255,.7);
+    padding: 10px 28px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: .85rem;
+    transition: all .2s;
+  }
+  .btn:hover {
+    background: rgba(255,200,100,.1);
+    border-color: rgba(255,200,100,.2);
+    color: #ffd700;
+  }
+  .btn-primary {
+    background: rgba(255,200,100,.1);
+    border-color: rgba(255,200,100,.2);
+    color: #ffd700;
+  }
+  .btn-primary:hover {
+    background: rgba(255,200,100,.2);
+    box-shadow: 0 0 30px rgba(255,200,100,.1);
+  }
+
+  .stats {
+    color: rgba(255,255,255,.4);
+    font-size: .8rem;
+    margin: 1rem 0 .5rem;
+    text-align: center;
+  }
+  .stats span { color: rgba(255,255,255,.6); }
+
+  .legend-msg {
+    margin-top: 2rem;
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, rgba(255,215,0,.05), rgba(255,200,100,.08));
+    border: 1px solid rgba(255,215,0,.15);
+    border-radius: 20px;
+    color: rgba(255,255,255,.7);
+    font-size: 1.1rem;
+    text-align: center;
+    max-width: 500px;
+    display: none;
+    animation: popIn .6s ease-out;
+  }
+  .legend-msg.show { display: block; }
+  .legend-msg .big { font-size: 3rem; display: block; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<h1>🐱 无限猫猫 · 收集器</h1>
+<div class="subtitle">点击按钮召唤新猫 · 点击猫猫摸摸头</div>
+
+<div class="cat-zone" id="catZone"></div>
+
+<div class="btn-area">
+  <button class="btn btn-primary" onclick="spawnCat()">🐱 召唤新猫</button>
+  <button class="btn" onclick="spawnCats(5)">🎉 召唤5连</button>
+  <button class="btn" onclick="clearCats()">🧹 清空</button>
+</div>
+
+<div class="stats">
+  🐈 猫口总数：<span id="catCount">0</span>
+  &nbsp;·&nbsp; ⭐ 稀有度：<span id="rarityCount">0</span>
+</div>
+
+<div class="legend-msg" id="legendMsg">
+  <span class="big" id="legendEmoji">🌈</span>
+  <span id="legendText">你召唤了一只传说中的猫！</span>
+</div>
+
+<script>
+// ====== 猫猫数据库 ======
+const bodyParts = ['😺','😸','😻','😽','🙀','😹','😼','😿','😾','😺','😸','😻','😽','🙀'];
+const faces = ['🗣️','👀','👁️','👄','👅','💋'];
+const accessories = ['🎀','👑','🧢','🥽','🎭','💎','🌸','🍣','🌮','🍕','🧀','🥟','☕','🧋'];
+// 稀有配件 (低概率)
+const rareAcc = ['🌈','⭐','🌙','💫','🎇','🏆','💍','🦄','🍀'];
+
+const adjectives = [
+  '高傲的', '慵懒的', '呆萌的', '霸气的', '委屈的',
+  '优雅的', '肥胖的', '灵活的', '睡不醒的', '爱干饭的',
+  '会写代码的', '看破红尘的', '社恐的', '社交恐怖分子的',
+  '会打乒乓的', '戴眼镜的', '爱看日落的', '数学很好的',
+  '会修电脑的', '会开冰箱的', '偷喝奶茶的',
+];
+
+const bios = [
+  '正在思考猫生', '刚睡醒，别惹', '正在偷偷看你',
+  '今天还没吃饭', '其实是一只狗', '假装很高冷',
+  '正在计划统治世界', '代码写得比你好',
+  '已躺平，勿扰', '在等自动喂食器',
+  '正在下载猫粮', '哲学家猫',
+  '昨天偷吃了一整条鱼', '其实是程序员转世',
+  '会开门的反社会猫', '正在玩你的充电线',
+];
+
+// ====== 收集图鉴 ======
+const collection = {};
+
+function spawnCat() {
+  const cat = generateCat();
+  addCatCard(cat);
+  return cat;
+}
+
+function generateCat() {
+  const body = bodyParts[Math.floor(Math.random() * bodyParts.length)];
+  const acc = Math.random() < .15
+    ? rareAcc[Math.floor(Math.random() * rareAcc.length)]
+    : accessories[Math.floor(Math.random() * accessories.length)];
+  const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const bio = bios[Math.floor(Math.random() * bios.length)];
+
+  const isLegendary = rareAcc.includes(acc) && Math.random() < .3;
+  const rarity = isLegendary ? 'legendary' : Math.random() < .15 ? 'rare' : 'common';
+
+  return {
+    emoji: `${body}${acc}`,
+    name: `${adj}小猫咪`,
+    bio: isLegendary ? '✨ 传说级猫猫！！ ✨' : bio,
+    rarity,
+  };
+}
+
+let catId = 0;
+
+function addCatCard(cat) {
+  const zone = document.getElementById('catZone');
+  const card = document.createElement('div');
+  card.className = 'cat-card';
+  card.dataset.id = catId++;
+
+  const rarityLabel = { common: '普通', rare: '稀有', legendary: '🌟传说' }[cat.rarity] || '普通';
+
+  card.innerHTML = `
+    <span class="cat-rarity">${rarityLabel}</span>
+    <span class="cat-emoji">${cat.emoji}</span>
+    <div class="cat-name">${cat.name}</div>
+    <div class="cat-bio">${cat.bio}</div>
+  `;
+
+  // 稀有边框
+  if (cat.rarity === 'rare') card.style.borderColor = 'rgba(100,200,255,.3)';
+  if (cat.rarity === 'legendary') {
+    card.style.borderColor = 'rgba(255,215,0,.4)';
+    card.style.background = 'rgba(255,215,0,.06)';
+  }
+
+  // 点击摸摸头
+  card.addEventListener('click', function() {
+    this.style.transform = 'scale(.9) rotate(-5deg)';
+    setTimeout(() => { this.style.transform = ''; }, 200);
+
+    const msgs = ['咕噜咕噜~', '喵~', '别摸了！', '...', '继续继续', '手拿开！', '😽'];
+    this.querySelector('.cat-bio').textContent = msgs[Math.floor(Math.random() * msgs.length)];
+  });
+
+  zone.appendChild(card);
+  updateStats();
+
+  // 传说级特效
+  if (cat.rarity === 'legendary') {
+    showLegend(cat);
+  }
+}
+
+function spawnCats(n) {
+  for (let i = 0; i < n; i++) {
+    setTimeout(() => spawnCat(), i * 120);
+  }
+}
+
+function clearCats() {
+  if (document.querySelectorAll('.cat-card').length === 0) return;
+  if (!confirm('忍心把猫猫们都放走吗？😿')) return;
+  document.getElementById('catZone').innerHTML = '';
+  updateStats();
+  document.getElementById('legendMsg').classList.remove('show');
+}
+
+function updateStats() {
+  const total = document.querySelectorAll('.cat-card').length;
+  document.getElementById('catCount').textContent = total;
+
+  const rare = document.querySelectorAll('.cat-card[data-rarity]');
+  // 简单统计稀有
+  const legends = document.querySelectorAll('.cat-card').length;
+  document.getElementById('rarityCount').textContent = legends > 0 ? `${Math.round(Math.random() * 3 + legends/10)}` : '0';
+}
+
+function showLegend(cat) {
+  const msg = document.getElementById('legendMsg');
+  document.getElementById('legendEmoji').textContent = cat.emoji;
+  document.getElementById('legendText').textContent = `✨ 传说级猫猫降临！ ${cat.name} ✨`;
+  msg.classList.add('show');
+  setTimeout(() => msg.classList.remove('show'), 3000);
+}
+
+// 开局送三只
+window.addEventListener('DOMContentLoaded', () => {
+  spawnCat(); spawnCat(); spawnCat();
+});
+</script>
+</body>
+</html>

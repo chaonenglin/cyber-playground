@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>功德木鱼 · 赛博禅修</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100svh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    font-family: system-ui, 'Segoe UI', sans-serif;
+    user-select: none;
+    touch-action: manipulation;
+  }
+  .container {
+    text-align: center;
+    position: relative;
+  }
+  .title {
+    color: rgba(255,255,255,.85);
+    font-size: 1.5rem;
+    letter-spacing: .3em;
+    margin-bottom: 2rem;
+    font-weight: 300;
+  }
+  .title span { opacity: .5; }
+  .muyu {
+    width: 240px; height: 240px;
+    margin: 0 auto;
+    cursor: pointer;
+    position: relative;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #d4a853, #996a2a 60%, #5a3a10);
+    box-shadow:
+      0 20px 60px rgba(0,0,0,.5),
+      inset 0 -8px 20px rgba(0,0,0,.3),
+      inset 0 8px 20px rgba(255,215,100,.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .08s ease;
+  }
+  .muyu::before {
+    content: '';
+    position: absolute;
+    width: 70%;
+    height: 70%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #e8c46a, #b8842a 60%, #7a5210);
+    box-shadow: inset 0 -6px 14px rgba(0,0,0,.4), inset 0 6px 14px rgba(255,235,150,.3);
+  }
+  .muyu::after {
+    content: '功德';
+    position: absolute;
+    font-size: 1.8rem;
+    color: rgba(255,255,200,.9);
+    text-shadow: 0 2px 8px rgba(0,0,0,.5);
+    letter-spacing: .15em;
+    font-weight: 600;
+  }
+  .muyu:active {
+    transform: scale(.93);
+  }
+  .counter-wrap {
+    margin-top: 2.5rem;
+    color: rgba(255,255,255,.7);
+    font-size: 1rem;
+    letter-spacing: .2em;
+  }
+  .counter {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #ffd700;
+    text-shadow: 0 0 30px rgba(255,215,0,.3);
+    line-height: 1.2;
+  }
+  .floating-text {
+    position: fixed;
+    pointer-events: none;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #ffd700;
+    text-shadow: 0 2px 20px rgba(255,215,0,.5);
+    animation: floatUp 1.4s ease-out forwards;
+    z-index: 100;
+  }
+  @keyframes floatUp {
+    0%   { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-160px) scale(1.4); }
+  }
+  .toast-area {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    pointer-events: none;
+    z-index: 50;
+  }
+  .toast {
+    background: rgba(255,255,255,.08);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,215,0,.15);
+    padding: 8px 24px;
+    border-radius: 40px;
+    color: rgba(255,255,255,.8);
+    font-size: .85rem;
+    animation: toastIn .5s ease-out, toastOut .5s ease-in 2.2s forwards;
+    white-space: nowrap;
+  }
+  @keyframes toastIn  { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+  @keyframes toastOut { 0% { opacity: 1; } 100% { opacity: 0; transform: translateY(-10px); } }
+
+  .settings {
+    margin-top: 2rem;
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+  }
+  .settings button {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1);
+    color: rgba(255,255,255,.6);
+    padding: 6px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: .8rem;
+    transition: all .2s;
+  }
+  .settings button:hover {
+    background: rgba(255,215,0,.12);
+    border-color: rgba(255,215,0,.3);
+    color: #ffd700;
+  }
+
+  /* 连击特效 */
+  .combo {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    font-size: 5rem;
+    font-weight: 800;
+    pointer-events: none;
+    animation: comboPop .8s ease-out forwards;
+    z-index: 200;
+  }
+  @keyframes comboPop {
+    0%   { opacity: 1; transform: translate(-50%,-50%) scale(.5); }
+    50%  { opacity: 1; transform: translate(-50%,-50%) scale(1.2); }
+    100% { opacity: 0; transform: translate(-50%,-60%) scale(1); }
+  }
+
+  .rank-badge {
+    display: inline-block;
+    padding: 4px 16px;
+    border-radius: 20px;
+    font-size: .8rem;
+    background: rgba(255,215,0,.1);
+    border: 1px solid rgba(255,215,0,.2);
+    color: #ffd700;
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="title">🙏 赛博禅修 <span>|</span> Cyber Muyu</div>
+
+  <div class="muyu" id="muyu"></div>
+
+  <div class="counter-wrap">
+    <div class="counter" id="counter">0</div>
+    <div>累计功德</div>
+    <div class="rank-badge" id="rank">凡俗 · 待修行</div>
+  </div>
+
+  <div class="settings">
+    <button onclick="resetAll()">🔄 重置</button>
+    <button onclick="autoMode()">🤖 自动功德</button>
+  </div>
+</div>
+
+<div class="toast-area" id="toastArea"></div>
+
+<script>
+// ====== 音效 (Web Audio, 不需要任何文件) ======
+let audioCtx = null;
+function playSound() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const now = audioCtx.currentTime;
+
+  // 低频撞击
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(480, now);
+  osc.frequency.exponentialRampToValueAtTime(120, now + .06);
+  gain.gain.setValueAtTime(.5, now);
+  gain.gain.exponentialRampToValueAtTime(.001, now + .18);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(now); osc.stop(now + .18);
+
+  // 泛音 (木质感)
+  const osc2 = audioCtx.createOscillator();
+  const gain2 = audioCtx.createGain();
+  osc2.type = 'triangle';
+  osc2.frequency.setValueAtTime(720, now);
+  osc2.frequency.exponentialRampToValueAtTime(200, now + .04);
+  gain2.gain.setValueAtTime(.25, now);
+  gain2.gain.exponentialRampToValueAtTime(.001, now + .1);
+  osc2.connect(gain2).connect(audioCtx.destination);
+  osc2.start(now); osc2.stop(now + .1);
+}
+
+// ====== 功德语录 ======
+const quotes = [
+  '功德 +1', '阿弥陀佛', '善哉善哉', '福报 +1', '心诚则灵',
+  '烦恼即菩提', '一切有为法', '随喜赞叹', '菩萨保佑',
+  '放下执念', '诸恶莫作', '众善奉行', '色即是空',
+  '应无所住', '本来无一物', '吃素一天',
+  '老板明天加薪', '今晚不加班', '代码零 bug',
+];
+
+const rankTiers = [
+  { min: 0,    label: '凡俗 · 待修行' },
+  { min: 10,   label: '入门 · 扫地僧' },
+  { min: 50,   label: '沙弥 · 初入佛门' },
+  { min: 100,  label: '比丘 · 晨钟暮鼓' },
+  { min: 200,  label: '上座 · 法相庄严' },
+  { min: 500,  label: '法师 · 弘法利生' },
+  { min: 1000, label: '禅师 · 明心见性' },
+  { min: 2000, label: '罗汉 · 超出三界' },
+  { min: 5000, label: '菩萨 · 自觉觉他' },
+  { min: 10000, label: '✨ 活佛 · 功德圆满 ✨' },
+];
+
+const comboMessages = [
+  { min: 10,  text: '🔟 连击！十方世界皆震动' },
+  { min: 30,  text: '💥 三十连！功德无量' },
+  { min: 50,  text: '🔥🔥 五十连！佛光普照' },
+  { min: 100, text: '🌈 百连！你已经超越了凡俗' },
+  { min: 200, text: '⚡ 二百连！肉身成圣' },
+  { min: 500, text: '🌟 五百连！如来亲传' },
+];
+
+let count = parseInt(localStorage.getItem('muyuCount') || '0');
+let combo = 0;
+let lastTap = 0;
+
+// ====== DOM 引用 ======
+const counterEl = document.getElementById('counter');
+const muyuEl = document.getElementById('muyu');
+const toastArea = document.getElementById('toastArea');
+const rankEl = document.getElementById('rank');
+
+function updateUI() {
+  counterEl.textContent = count;
+  localStorage.setItem('muyuCount', count);
+
+  // 段位
+  let label = rankTiers[0].label;
+  for (let i = rankTiers.length - 1; i >= 0; i--) {
+    if (count >= rankTiers[i].min) { label = rankTiers[i].label; break; }
+  }
+  rankEl.textContent = label;
+}
+
+// ====== 弹字特效 ======
+function spawnFloat(x, y) {
+  const el = document.createElement('div');
+  el.className = 'floating-text';
+  el.textContent = quotes[Math.floor(Math.random() * quotes.length)];
+  el.style.left = (x - 40 + Math.random() * 80) + 'px';
+  el.style.top = (y - 20) + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1400);
+}
+
+// ====== 底部提示 ======
+let toastTimer = null;
+function showToast(text) {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = text;
+  toastArea.appendChild(el);
+  setTimeout(() => el.remove(), 2700);
+}
+
+// ====== 连击大特效 ======
+function showCombo(text) {
+  const el = document.createElement('div');
+  el.className = 'combo';
+  el.textContent = text;
+  // 随机颜色
+  const hue = Math.random() * 360;
+  el.style.color = `hsl(${hue}, 100%, 65%)`;
+  el.style.textShadow = `0 0 60px hsla(${hue}, 100%, 65%, .4)`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 800);
+}
+
+// ====== 敲 ======
+let autoInterval = null;
+
+function knock(e) {
+  playSound();
+
+  const now = Date.now();
+  if (now - lastTap < 600) {
+    combo++;
+  } else {
+    combo = 1;
+  }
+  lastTap = now;
+  count++;
+  updateUI();
+
+  // 浮字
+  const x = e?.clientX ?? window.innerWidth / 2;
+  const y = e?.clientY ?? window.innerHeight / 2;
+  spawnFloat(x, y);
+
+  // 段位特殊提示
+  for (const t of rankTiers) {
+    if (count === t.min) showToast(`🎉 晋升：${t.label}`);
+  }
+
+  // 连击成就
+  for (const cm of comboMessages) {
+    if (combo === cm.min) {
+      showToast(cm.text);
+      showCombo(cm.text);
+    }
+  }
+
+  // 随机彩蛋 (5% 概率)
+  if (Math.random() < .05) {
+    const eggs = [
+      '🐱 一只猫路过', '🍃 落叶飘下', '💡 你悟了', '🎲 骰子：大吉',
+      '🙈 菩萨笑了一下', '🌟 功德加倍！（并没有）',
+      '🧧 捡到两块钱', '🦋 蝴蝶停在木鱼上',
+    ];
+    showToast(eggs[Math.floor(Math.random() * eggs.length)]);
+  }
+}
+
+muyuEl.addEventListener('click', knock);
+
+// ====== 键盘快捷键 ======
+document.addEventListener('keydown', (e) => {
+  if (e.key === ' ' || e.key === 'Enter') {
+    e.preventDefault();
+    knock(e);
+  }
+});
+
+// ====== 重置 ======
+function resetAll() {
+  if (count === 0) return showToast('已经清零了啦 🙄');
+  if (!confirm('确定清空所有功德？佛祖会伤心的')) return;
+  count = 0; combo = 0; lastTap = 0;
+  localStorage.setItem('muyuCount', '0');
+  updateUI();
+  showToast('🔄 一切归零，重新修行');
+}
+
+// ====== 自动模式 ======
+function autoMode() {
+  if (autoInterval) {
+    clearInterval(autoInterval);
+    autoInterval = null;
+    showToast('🙏 自动功德已关闭');
+    return;
+  }
+  showToast('🤖 佛祖代敲模式启动');
+  autoInterval = setInterval(() => {
+    count++;
+    updateUI();
+    combo++;
+    if (Math.random() < .3) {
+      spawnFloat(
+        window.innerWidth / 2 + (Math.random() - .5) * 200,
+        window.innerHeight / 2
+      );
+    }
+  }, 300);
+}
+
+// ====== 初始化 ======
+updateUI();
+if (count > 0) showToast('🙏 继续禅修吧');
+else showToast('点击木鱼，积累功德');
+
+// 清除自动定时器
+window.addEventListener('beforeunload', () => {
+  if (autoInterval) clearInterval(autoInterval);
+});
+</script>
+</body>
+</html>
