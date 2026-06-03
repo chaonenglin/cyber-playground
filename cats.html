@@ -197,41 +197,46 @@ let loading = false;
 async function spawnCat() {
   if (loading) return;
   loading = true;
-  const cat = await fetchCatImage();
-  if (cat) addCatCard(cat);
+  const cat = await generateCat();
+  addCatCard(cat);
   loading = false;
   return cat;
 }
 
-async function fetchCatImage() {
+// ====== 真实猫片 API ======
+async function fetchRealCat() {
   try {
-    const resp = await fetch('https://api.thecatapi.com/v1/images/search?mime_types=jpg,png');
-    const data = await resp.json();
-    if (!data || !data.length) return generateFallbackCat();
-    const imgUrl = data[0].url;
-    const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-    const bio = bios[Math.floor(Math.random() * bios.length)];
-    const decor = emojiDecor[Math.floor(Math.random() * emojiDecor.length)];
-    const isLegendary = Math.random() < 0.08;
-    const rarity = isLegendary ? 'legendary' : Math.random() < 0.15 ? 'rare' : 'common';
-    return { imgUrl, name: `${adj}小猫咪`, bio: isLegendary ? '✨ 传说级猫猫！！ ✨' : bio, rarity, decor };
-  } catch(e) {
-    return generateFallbackCat();
-  }
+    const r = await fetch('https://api.thecatapi.com/v1/images/search?mime_types=jpg,png');
+    const d = await r.json();
+    if (!d || !d.length) return null;
+    return d[0].url;
+  } catch(e) { return null; }
 }
 
-function generateFallbackCat() {
-  const fallbacks = [
-    'https://cdn2.thecatapi.com/images/9l0.jpg',
-    'https://cdn2.thecatapi.com/images/MTY3Nzk4Ng.jpg',
-    'https://cdn2.thecatapi.com/images/MTc5NjU0Mg.jpg',
-    'https://cdn2.thecatapi.com/images/MTU4NjE4OA.jpg',
-    'https://cdn2.thecatapi.com/images/bqo.jpg',
-  ];
+async function generateCat() {
+  const imgUrl = await fetchRealCat();
+  if (!imgUrl) return generateCatEmoji(); // fallback
   const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
   const bio = bios[Math.floor(Math.random() * bios.length)];
-  const decor = emojiDecor[Math.floor(Math.random() * emojiDecor.length)];
-  return { imgUrl: fallbacks[Math.floor(Math.random()*fallbacks.length)], name: `${adj}小猫咪`, bio, rarity: 'common', decor };
+  const acc = ['🎀','👑','🧢','🌸','🧋','🌈','⭐','💫','🏆','🦋','🍀','🎭','💎','🍣','🍕'][Math.floor(Math.random()*15)];
+  const isLegendary = Math.random()<0.08;
+  const rarity = isLegendary?'legendary':Math.random()<0.15?'rare':'common';
+  return { imgUrl, name: `${adj}小猫咪`, bio: isLegendary?'✨ 传说级猫猫！！ ✨':bio, rarity, acc, isReal: true };
+}
+
+// ====== emoji fallback ======
+const catFaces = ['😺','😸','😻','😽','🙀','😹','😼','😿','😾','🐱','🐈'];
+const furColors = ['#f5a623','#4a4a4a','#fff','#f5a0b0','#8B4513','#c0c0c0','#ff8c00','#2c2c2c','#d4a574','#ffd700','#e74c3c','#3498db'];
+
+function generateCatEmoji() {
+  const face = catFaces[Math.floor(Math.random()*catFaces.length)];
+  const acc = ['','🎀','👑','🧢','🌸','🧋','🌈','⭐','💫'][Math.floor(Math.random()*9)];
+  const furBg = furColors[Math.floor(Math.random()*furColors.length)];
+  const adj = adjectives[Math.floor(Math.random()*adjectives.length)];
+  const bio = bios[Math.floor(Math.random()*bios.length)];
+  const isLegendary = Math.random()<0.08;
+  const rarity = isLegendary?'legendary':Math.random()<0.15?'rare':'common';
+  return { face, acc, furBg, name: `${adj}小猫咪`, bio: isLegendary?'✨ 传说级猫猫！！ ✨':bio, rarity, isReal: false };
 }
 
 function addCatCard(cat) {
@@ -242,12 +247,21 @@ function addCatCard(cat) {
 
   const rarityLabel = { common: '普通', rare: '稀有', legendary: '🌟传说' }[cat.rarity] || '普通';
 
-  card.innerHTML = `
-    <span class="cat-rarity">${rarityLabel} ${cat.decor||''}</span>
-    <img src="${cat.imgUrl}" style="width:100px;height:100px;object-fit:cover;border-radius:50%;margin:4px auto;display:block;border:2px solid rgba(255,255,255,.04)" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐱</text></svg>'">
-    <div class="cat-name">${cat.name}</div>
-    <div class="cat-bio">${cat.bio}</div>
-  `;
+  if (cat.isReal) {
+    card.innerHTML = `
+      <span class="cat-rarity">${rarityLabel} ${cat.acc||''}</span>
+      <img src="${cat.imgUrl}" style="width:100px;height:100px;object-fit:cover;border-radius:50%;margin:4px auto;display:block;border:2px solid rgba(255,255,255,.04)" loading="lazy">
+      <div class="cat-name">${cat.name}</div>
+      <div class="cat-bio">${cat.bio}</div>
+    `;
+  } else {
+    card.innerHTML = `
+      <span class="cat-rarity">${rarityLabel} ${cat.acc||''}</span>
+      <div style="width:100px;height:100px;border-radius:50%;margin:4px auto;display:flex;align-items:center;justify-content:center;background:${cat.furBg};font-size:3.2rem;border:2px solid rgba(255,255,255,.04)">${cat.face}</div>
+      <div class="cat-name">${cat.name}</div>
+      <div class="cat-bio">${cat.bio}</div>
+    `;
+  }
 
   // 稀有边框
   if (cat.rarity === 'rare') {
@@ -278,9 +292,9 @@ function addCatCard(cat) {
   }
 }
 
-function spawnCats(n) {
+async function spawnCats(n) {
   for (let i = 0; i < n; i++) {
-    setTimeout(() => spawnCat(), i * 120);
+    setTimeout(() => spawnCat(), i * 200);
   }
 }
 
@@ -304,15 +318,20 @@ function updateStats() {
 
 function showLegend(cat) {
   const msg = document.getElementById('legendMsg');
-  document.getElementById('legendEmoji').innerHTML = `<img src="${cat.imgUrl}" style="width:80px;height:80px;object-fit:cover;border-radius:50%;border:3px solid rgba(255,215,0,.3);display:inline-block">`;
+  const emoji = document.getElementById('legendEmoji');
+  if (cat.isReal) {
+    emoji.innerHTML = `<img src="${cat.imgUrl}" style="width:80px;height:80px;object-fit:cover;border-radius:50%;border:3px solid rgba(255,215,0,.3);display:inline-block">`;
+  } else {
+    emoji.innerHTML = `<span style="font-size:4rem">${cat.face}</span>`;
+  }
   document.getElementById('legendText').textContent = `✨ 传说级猫猫降临！ ${cat.name} ✨`;
   msg.classList.add('show');
   setTimeout(() => msg.classList.remove('show'), 3000);
 }
 
 // 开局送三只
-window.addEventListener('DOMContentLoaded', () => {
-  spawnCat(); spawnCat(); spawnCat();
+window.addEventListener('DOMContentLoaded', async () => {
+  await spawnCat(); await spawnCat(); await spawnCat();
 });
 </script>
 </body>
