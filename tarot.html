@@ -123,6 +123,7 @@ function setSpread(n) {
 function drawCard() {
   const area = document.getElementById('drawArea');
   const deck = document.getElementById('deckArea');
+  if (!deck) return;
 
   // 洗牌动画
   deck.style.transform = 'rotate(180deg) scale(.8)';
@@ -156,6 +157,7 @@ function drawCard() {
 
 function showResult(cards) {
   const area = document.getElementById('drawArea');
+  const deck = document.getElementById('deckArea');
 
   if (cards.length === 1) {
     const c = cards[0];
@@ -196,7 +198,7 @@ function showResult(cards) {
     p.animate([
       {transform:'translate(0,0) scale(1)',opacity:1},
       {transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px) scale(0)`,opacity:0}
-    ],{duration:600+easing:'ease-out'}).onfinish=()=>p.remove();
+    ],{duration:600,easing:'ease-out'}).onfinish=()=>p.remove();
   }
 }
 </script>
