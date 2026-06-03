@@ -55,6 +55,13 @@
     width: 140px !important;
     height: 140px !important;
   }
+  .synthesis-panel{margin:1rem auto;max-width:480px;background:rgba(255,215,0,.02);border:1px solid rgba(255,215,0,.06);border-radius:16px;padding:1rem;text-align:center}
+  .synth-title{color:rgba(255,215,0,.4);font-size:.75rem;letter-spacing:.15em;margin-bottom:.5rem}
+  .synth-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .synth-btn{background:rgba(255,215,0,.04);border:1px solid rgba(255,215,0,.08);color:rgba(255,215,0,.4);padding:8px 18px;border-radius:20px;cursor:pointer;font-size:.75rem;font-family:inherit;transition:all .2s}
+  .synth-btn:hover:not(:disabled){background:rgba(255,215,0,.08);border-color:rgba(255,215,0,.15);color:rgba(255,215,0,.6)}
+  .synth-btn:disabled{opacity:.3;cursor:not-allowed}
+  .synth-btn.active{background:rgba(255,215,0,.08);border-color:rgba(255,215,0,.2);color:rgba(255,215,0,.6)}
   .cat-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 40px rgba(0,0,0,.3);
@@ -168,6 +175,15 @@
   &nbsp;·&nbsp; ⭐ 稀有度：<span id="rarityCount">0</span>
 </div>
 
+<!-- 合成面板 -->
+<div class="synthesis-panel" id="synthesisPanel">
+  <div class="synth-title">🔮 合成</div>
+  <div class="synth-btns">
+    <button class="synth-btn" id="synthRare" onclick="synthesize('common','rare')" disabled>3普通 → 1稀有 <span id="synthRareCount">(0/3)</span></button>
+    <button class="synth-btn" id="synthLegend" onclick="synthesize('rare','legendary')" disabled>3稀有 → 1传说 <span id="synthLegendCount">(0/3)</span></button>
+  </div>
+</div>
+
 <div class="legend-msg" id="legendMsg">
   <span class="big" id="legendEmoji">🌈</span>
   <span id="legendText">你召唤了一只传说中的猫！</span>
@@ -207,117 +223,72 @@ async function spawnCat() {
   return cat;
 }
 
-// ====== 本地猫片（优先） + API补充 ======
-const localCats = [
-  '猫的图片/小猫照片/IMG_20260420_195445.jpg',
-  '猫的图片/小猫照片/IMG_20260422_155740.jpg',
-  '猫的图片/小猫照片/IMG_20260422_165209.jpg',
-  '猫的图片/小猫照片/IMG_20260422_165526.jpg',
-  '猫的图片/小猫照片/IMG_20260424_124426.jpg',
-  '猫的图片/小猫照片/IMG_20260424_144424.jpg',
-  '猫的图片/小猫照片/IMG_20260426_173110.jpg',
-  '猫的图片/小猫照片/IMG_20260426_173111.jpg',
-  '猫的图片/小猫照片/IMG_20260427_162634.jpg',
-  '猫的图片/小猫照片/IMG_20260427_203652.jpg',
-  '猫的图片/小猫照片/IMG_20260427_203943.jpg',
-  '猫的图片/小猫照片/IMG_20260428_084610.jpg',
-  '猫的图片/小猫照片/IMG_20260428_114324.jpg',
-  '猫的图片/小猫照片/IMG_20260429_215553.jpg',
-  '猫的图片/小猫照片/IMG_20260429_215554.jpg',
-  '猫的图片/小猫照片/IMG_20260429_215625.jpg',
-  '猫的图片/小猫照片/IMG_20260430_141331.jpg',
-  '猫的图片/小猫照片/IMG_20260430213446965.jpeg',
-  '猫的图片/小猫照片/IMG_20260430231419134.jpeg',
-  '猫的图片/小猫照片/IMG_20260501_161937.jpg',
-  '猫的图片/小猫照片/IMG_20260501161939908.jpeg',
-  '猫的图片/小猫照片/IMG_20260502_083844.jpg',
-  '猫的图片/小猫照片/IMG_20260502_083846.jpg',
-  '猫的图片/小猫照片/IMG_20260502162036820.jpeg',
-  '猫的图片/小猫照片/IMG_20260503_182824.jpg',
-  '猫的图片/小猫照片/IMG_20260504_195808.jpg',
-  '猫的图片/小猫照片/IMG_20260504_215113.jpg',
-  '猫的图片/小猫照片/IMG_20260504_215118.jpg',
-  '猫的图片/小猫照片/IMG_20260505_161719.jpg',
-  '猫的图片/小猫照片/IMG_20260516_094135.jpg',
-  '猫的图片/小猫照片/IMG_20260516_094137.jpg',
-  '猫的图片/小猫照片/IMG_20260516_101506.jpg',
-  '猫的图片/小猫照片/IMG_20260518_233347.jpg',
-  '猫的图片/小猫照片/IMG_20260519_172406.jpg',
-  '猫的图片/小猫照片/IMG_20260520_122010.jpg',
-  '猫的图片/小猫照片/IMG_20260520_182337.jpg',
-  '猫的图片/小猫照片/IMG_20260523_195816.jpg',
-  '猫的图片/小猫照片/IMG_20260523_195952.jpg',
-  '猫的图片/小猫照片/IMG_20260523_195956.jpg',
-  '猫的图片/小猫照片/IMG_20260524_121937.jpg',
-  '猫的图片/小猫照片/IMG_20260524_121940.jpg',
-  '猫的图片/小猫照片/IMG_20260525_113426.jpg',
-  '猫的图片/小猫照片/IMG_20260525_113801.jpg',
-  '猫的图片/小猫照片/IMG_20260526_120620.jpg',
-  '猫的图片/小猫照片/IMG_20260526_120623.jpg',
-  '猫的图片/小猫照片/IMG_20260528_190228.jpg',
-  '猫的图片/小猫照片/IMG_20260528_190231.jpg',
-  '猫的图片/小猫照片/IMG_20260529_201252.jpg',
-  '猫的图片/小猫照片/IMG_20260602_173602.jpg',
-  '猫的图片/小猫照片/IMG_20260602_173603.jpg',
-  '猫的图片/小猫照片/IMG_20260602_185521.jpg',
-  '猫的图片/小猫照片/IMG_20260602_185544.jpg',
-  '猫的图片/小猫照片/IMG_20260602_190202.jpg',
-  '猫的图片/小猫照片/IMG_20260602_190228.jpg',
-  '猫的图片/小猫照片/IMG_20260602_190242.jpg',
-  '猫的图片/小猫照片/IMG_20260602_193156.jpg',
-  '猫的图片/小猫照片/mmexport1776669143812.jpg',
-  '猫的图片/小猫照片/mmexport1776669178859.jpg',
-  '猫的图片/小猫照片/mmexport1776670204155.jpg',
-  '猫的图片/小猫照片/mmexport1776670659207.jpg',
-  '猫的图片/小猫照片/mmexport1779009656955.jpg',
-  '猫的图片/小猫照片/mmexport1779010522122.jpg',
-  '猫的图片/小猫照片/mmexport1779010693154.jpg',
-  '猫的图片/小猫照片/mmexport1780401060812.jpg',
-  '猫的图片/小猫照片/retouch_2026051919200607.jpg',
-  '猫的图片/小猫照片/wx_camera_1777004238069.jpg',
-  '猫的图片/小猫照片/wx_camera_1777198497125.jpg',
-  '猫的图片/小猫照片/wx_camera_1777782845864.jpg',
-  '猫的图片/小猫照片/wx_camera_1778808814923.jpg',
-  '猫的图片/小猫照片/wx_camera_1778808851309.jpg',
-  '猫的图片/小猫照片/wx_camera_1778903358110.jpg',
-  '猫的图片/小猫照片/wx_camera_1779119661782.jpg',
-  '猫的图片/小猫照片/wx_camera_1779189131685.jpg',
-  '猫的图片/小猫照片/wx_camera_1779189401321.jpg',
-  '猫的图片/小猫照片/wx_camera_1779275365521.jpg',
-  '猫的图片/小猫照片/wx_camera_1779331611916.jpg',
-  '猫的图片/小猫照片/wx_camera_1779537120238.jpg',
-  '猫的图片/小猫照片/wx_camera_1779952364736.jpg',
-  '猫的图片/小猫照片/wx_camera_1780024354116.jpg',
-  '猫的图片/小猫照片/wx_camera_1780283309037.jpg',
-  '猫的图片/小猫照片/wx_camera_1780283325734.jpg',
-  '猫的图片/小猫照片/wx_camera_1780456835045.jpg',
-  '猫的图片/小猫照片/wx_camera_1780459158292.jpg',
-  '猫的图片/小猫照片/wx_camera_1780459175389.jpg',
-  '猫的图片/小猫照片/wx_camera_1780459245171.jpg',
-];
-
-async function fetchRealCat() {
-  // 优先用本地猫片
-  if (localCats.length > 0) {
-    return localCats[Math.floor(Math.random() * localCats.length)];
-  }
-  // 本地没图才走API
-  try {
-    const r = await fetch('https://api.thecatapi.com/v1/images/search?mime_types=jpg,png');
-    const d = await r.json();
-    if (!d || !d.length) return null;
-    return d[0].url;
-  } catch(e) { return null; }
+// ====== 猫片库（按稀有度分文件夹） ======
+const CAT_FOLDERS = {
+  common: '猫的图片/普通/',
+  rare: '猫的图片/稀有/',
+  legendary: '猫的图片/传说/',
+};
+// 预先从文件夹加载文件名（运行时动态构建路径）
+async function loadCatFromFolder(folder, rar) {
+  // 直接用 fetch 无法枚举目录，所以构建完整路径数组
+  const catFiles = {
+    common: [
+      'mmexport1776669143812.jpg','mmexport1776669178859.jpg','mmexport1776670204155.jpg','mmexport1776670659207.jpg',
+      'mmexport1779009656955.jpg','mmexport1779010522122.jpg','mmexport1779010693154.jpg','mmexport1780401060812.jpg',
+      'retouch_2026051919200607.jpg','wx_camera_1777004238069.jpg','wx_camera_1777198497125.jpg','wx_camera_1777782845864.jpg',
+      'wx_camera_1778808814923.jpg','wx_camera_1778808851309.jpg','wx_camera_1778903358110.jpg','wx_camera_1779119661782.jpg',
+      'wx_camera_1779189131685.jpg','wx_camera_1779189401321.jpg','wx_camera_1779275365521.jpg','wx_camera_1779331611916.jpg',
+      'wx_camera_1779537120238.jpg','wx_camera_1779952364736.jpg','wx_camera_1780024354116.jpg','wx_camera_1780283309037.jpg',
+      'wx_camera_1780283325734.jpg','wx_camera_1780456835045.jpg','wx_camera_1780459158292.jpg','wx_camera_1780459175389.jpg',
+      'wx_camera_1780459245171.jpg',
+    ],
+    rare: [
+      'IMG_20260422_155740.jpg','IMG_20260422_165209.jpg','IMG_20260424_144424.jpg','IMG_20260426_173110.jpg',
+      'IMG_20260426_173111.jpg','IMG_20260427_203652.jpg','IMG_20260427_203943.jpg','IMG_20260428_084610.jpg',
+      'IMG_20260428_114324.jpg','IMG_20260429_215553.jpg','IMG_20260429_215554.jpg','IMG_20260429_215625.jpg',
+      'IMG_20260430213446965.jpeg','IMG_20260430231419134.jpeg','IMG_20260501161939908.jpeg','IMG_20260502162036820.jpeg',
+      'IMG_20260503_182824.jpg','IMG_20260504_195808.jpg','IMG_20260504_215113.jpg','IMG_20260504_215118.jpg',
+      'IMG_20260505_161719.jpg','IMG_20260516_094135.jpg','IMG_20260516_094137.jpg','IMG_20260516_101506.jpg',
+      'IMG_20260518_233347.jpg','IMG_20260519_172406.jpg','IMG_20260520_122010.jpg','IMG_20260520_182337.jpg',
+      'IMG_20260523_195816.jpg','IMG_20260523_195952.jpg','IMG_20260523_195956.jpg','IMG_20260524_121937.jpg',
+      'IMG_20260524_121940.jpg','IMG_20260525_113426.jpg','IMG_20260525_113801.jpg','IMG_20260526_120620.jpg',
+      'IMG_20260526_120623.jpg','IMG_20260529_201252.jpg','IMG_20260602_173602.jpg','IMG_20260602_173603.jpg',
+      'IMG_20260602_190202.jpg','IMG_20260602_190228.jpg','IMG_20260602_190242.jpg','IMG_20260602_193156.jpg',
+      'IMG_20260420_195445.jpg','IMG_20260422_165526.jpg','IMG_20260427_162634.jpg','IMG_20260528_190228.jpg',
+      'IMG_20260528_190231.jpg','IMG_20260602_185544.jpg',
+    ],
+    legendary: [
+      'IMG_20260424_124426.jpg','IMG_20260501_161937.jpg','IMG_20260502_083846.jpg',
+      'IMG_20260502_083844.jpg','IMG_20260602_185521.jpg','IMG_20260430_141331.jpg',
+    ],
+  };
+  const files = catFiles[rar] || catFiles.common;
+  if (!files.length) return null;
+  return CAT_FOLDERS[rar] + files[Math.floor(Math.random() * files.length)];
 }
 
-async function generateCat() {
-  const imgUrl = await fetchRealCat();
-  if (!imgUrl) return generateCatEmoji(); // fallback
+async function generateCat(rarity) {
+  // 不指定稀有度则按概率随机
+  if (!rarity) {
+    const roll = Math.random();
+    rarity = roll < 0.06 ? 'legendary' : roll < 0.25 ? 'rare' : 'common';
+  }
+  // 从对应文件夹随机取一张
+  let imgUrl = await loadCatFromFolder('', rarity);
+  // fallback: 如果文件夹没图，走API
+  if (!imgUrl) {
+    try {
+      const r = await fetch('https://api.thecatapi.com/v1/images/search?mime_types=jpg,png');
+      const d = await r.json();
+      if (d && d.length) imgUrl = d[0].url;
+    } catch(e) {}
+  }
+  if (!imgUrl) return generateCatEmoji(rarity);
   const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
   const bio = bios[Math.floor(Math.random() * bios.length)];
   const acc = ['🎀','👑','🧢','🌸','🧋','🌈','⭐','💫','🏆','🦋','🍀','🎭','💎','🍣','🍕'][Math.floor(Math.random()*15)];
-  const isLegendary = Math.random()<0.08;
-  const rarity = isLegendary?'legendary':Math.random()<0.15?'rare':'common';
+  const isLegendary = rarity === 'legendary';
   return { imgUrl, name: `${adj}小猫咪`, bio: isLegendary?'✨ 传说级猫猫！！ ✨':bio, rarity, acc, isReal: true };
 }
 
@@ -325,14 +296,14 @@ async function generateCat() {
 const catFaces = ['😺','😸','😻','😽','🙀','😹','😼','😿','😾','🐱','🐈'];
 const furColors = ['#f5a623','#4a4a4a','#fff','#f5a0b0','#8B4513','#c0c0c0','#ff8c00','#2c2c2c','#d4a574','#ffd700','#e74c3c','#3498db'];
 
-function generateCatEmoji() {
+function generateCatEmoji(rarity) {
   const face = catFaces[Math.floor(Math.random()*catFaces.length)];
   const acc = ['','🎀','👑','🧢','🌸','🧋','🌈','⭐','💫'][Math.floor(Math.random()*9)];
   const furBg = furColors[Math.floor(Math.random()*furColors.length)];
   const adj = adjectives[Math.floor(Math.random()*adjectives.length)];
   const bio = bios[Math.floor(Math.random()*bios.length)];
-  const isLegendary = Math.random()<0.08;
-  const rarity = isLegendary?'legendary':Math.random()<0.15?'rare':'common';
+  if (!rarity) rarity = Math.random()<0.06?'legendary':Math.random()<0.25?'rare':'common';
+  const isLegendary = rarity === 'legendary';
   return { face, acc, furBg, name: `${adj}小猫咪`, bio: isLegendary?'✨ 传说级猫猫！！ ✨':bio, rarity, isReal: false };
 }
 
@@ -380,6 +351,7 @@ function addCatCard(cat) {
     this.querySelector('.cat-bio').textContent = msgs[Math.floor(Math.random() * msgs.length)];
   });
 
+  card.dataset.rarity = cat.rarity;
   zone.appendChild(card);
   updateStats();
 
@@ -403,14 +375,42 @@ function clearCats() {
   document.getElementById('legendMsg').classList.remove('show');
 }
 
+function countByRarity(rar) {
+  return document.querySelectorAll(`.cat-card[data-rarity="${rar}"]`).length;
+}
+
 function updateStats() {
   const total = document.querySelectorAll('.cat-card').length;
   document.getElementById('catCount').textContent = total;
+  const l = countByRarity('legendary');
+  const r = countByRarity('rare');
+  const c = countByRarity('common');
+  document.getElementById('rarityCount').textContent = `🌟${l} 💎${r} 📦${c}`;
 
-  const rare = document.querySelectorAll('.cat-card[data-rarity]');
-  // 简单统计稀有
-  const legends = document.querySelectorAll('.cat-card').length;
-  document.getElementById('rarityCount').textContent = legends > 0 ? `${Math.round(Math.random() * 3 + legends/10)}` : '0';
+  // 合成按钮
+  const btnR = document.getElementById('synthRare');
+  const btnL = document.getElementById('synthLegend');
+  btnR.disabled = c < 3;
+  btnL.disabled = r < 3;
+  document.getElementById('synthRareCount').textContent = `(${c}/3)`;
+  document.getElementById('synthLegendCount').textContent = `(${r}/3)`;
+  if (c >= 3) btnR.classList.add('active'); else btnR.classList.remove('active');
+  if (r >= 3) btnL.classList.add('active'); else btnL.classList.remove('active');
+}
+
+async function synthesize(from, to) {
+  const cards = document.querySelectorAll(`.cat-card[data-rarity="${from}"]`);
+  if (cards.length < 3) return;
+  // 移除3张
+  for (let i = 0; i < 3; i++) cards[i].remove();
+  // 生成1张高级的
+  const cat = await generateCat(to);
+  addCatCard(cat);
+  // 合成特效
+  const panel = document.getElementById('synthesisPanel');
+  panel.style.boxShadow = '0 0 40px rgba(255,215,0,.1)';
+  setTimeout(() => panel.style.boxShadow = '', 600);
+  updateStats();
 }
 
 function showLegend(cat) {
