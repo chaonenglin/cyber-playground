@@ -44,12 +44,16 @@
     border: 1px solid rgba(255,255,255,.06);
     border-radius: 20px;
     padding: 20px 16px 16px;
-    width: 140px;
+    width: 180px;
     text-align: center;
     animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
     transition: transform .2s, box-shadow .2s;
     cursor: pointer;
     position: relative;
+  }
+  .cat-card img {
+    width: 140px !important;
+    height: 140px !important;
   }
   .cat-card:hover {
     transform: translateY(-4px);
@@ -203,8 +207,101 @@ async function spawnCat() {
   return cat;
 }
 
-// ====== 真实猫片 API ======
+// ====== 本地猫片（优先） + API补充 ======
+const localCats = [
+  '猫的图片/小猫照片/IMG_20260420_195445.jpg',
+  '猫的图片/小猫照片/IMG_20260422_155740.jpg',
+  '猫的图片/小猫照片/IMG_20260422_165209.jpg',
+  '猫的图片/小猫照片/IMG_20260422_165526.jpg',
+  '猫的图片/小猫照片/IMG_20260424_124426.jpg',
+  '猫的图片/小猫照片/IMG_20260424_144424.jpg',
+  '猫的图片/小猫照片/IMG_20260426_173110.jpg',
+  '猫的图片/小猫照片/IMG_20260426_173111.jpg',
+  '猫的图片/小猫照片/IMG_20260427_162634.jpg',
+  '猫的图片/小猫照片/IMG_20260427_203652.jpg',
+  '猫的图片/小猫照片/IMG_20260427_203943.jpg',
+  '猫的图片/小猫照片/IMG_20260428_084610.jpg',
+  '猫的图片/小猫照片/IMG_20260428_114324.jpg',
+  '猫的图片/小猫照片/IMG_20260429_215553.jpg',
+  '猫的图片/小猫照片/IMG_20260429_215554.jpg',
+  '猫的图片/小猫照片/IMG_20260429_215625.jpg',
+  '猫的图片/小猫照片/IMG_20260430_141331.jpg',
+  '猫的图片/小猫照片/IMG_20260430213446965.jpeg',
+  '猫的图片/小猫照片/IMG_20260430231419134.jpeg',
+  '猫的图片/小猫照片/IMG_20260501_161937.jpg',
+  '猫的图片/小猫照片/IMG_20260501161939908.jpeg',
+  '猫的图片/小猫照片/IMG_20260502_083844.jpg',
+  '猫的图片/小猫照片/IMG_20260502_083846.jpg',
+  '猫的图片/小猫照片/IMG_20260502162036820.jpeg',
+  '猫的图片/小猫照片/IMG_20260503_182824.jpg',
+  '猫的图片/小猫照片/IMG_20260504_195808.jpg',
+  '猫的图片/小猫照片/IMG_20260504_215113.jpg',
+  '猫的图片/小猫照片/IMG_20260504_215118.jpg',
+  '猫的图片/小猫照片/IMG_20260505_161719.jpg',
+  '猫的图片/小猫照片/IMG_20260516_094135.jpg',
+  '猫的图片/小猫照片/IMG_20260516_094137.jpg',
+  '猫的图片/小猫照片/IMG_20260516_101506.jpg',
+  '猫的图片/小猫照片/IMG_20260518_233347.jpg',
+  '猫的图片/小猫照片/IMG_20260519_172406.jpg',
+  '猫的图片/小猫照片/IMG_20260520_122010.jpg',
+  '猫的图片/小猫照片/IMG_20260520_182337.jpg',
+  '猫的图片/小猫照片/IMG_20260523_195816.jpg',
+  '猫的图片/小猫照片/IMG_20260523_195952.jpg',
+  '猫的图片/小猫照片/IMG_20260523_195956.jpg',
+  '猫的图片/小猫照片/IMG_20260524_121937.jpg',
+  '猫的图片/小猫照片/IMG_20260524_121940.jpg',
+  '猫的图片/小猫照片/IMG_20260525_113426.jpg',
+  '猫的图片/小猫照片/IMG_20260525_113801.jpg',
+  '猫的图片/小猫照片/IMG_20260526_120620.jpg',
+  '猫的图片/小猫照片/IMG_20260526_120623.jpg',
+  '猫的图片/小猫照片/IMG_20260528_190228.jpg',
+  '猫的图片/小猫照片/IMG_20260528_190231.jpg',
+  '猫的图片/小猫照片/IMG_20260529_201252.jpg',
+  '猫的图片/小猫照片/IMG_20260602_173602.jpg',
+  '猫的图片/小猫照片/IMG_20260602_173603.jpg',
+  '猫的图片/小猫照片/IMG_20260602_185521.jpg',
+  '猫的图片/小猫照片/IMG_20260602_185544.jpg',
+  '猫的图片/小猫照片/IMG_20260602_190202.jpg',
+  '猫的图片/小猫照片/IMG_20260602_190228.jpg',
+  '猫的图片/小猫照片/IMG_20260602_190242.jpg',
+  '猫的图片/小猫照片/IMG_20260602_193156.jpg',
+  '猫的图片/小猫照片/mmexport1776669143812.jpg',
+  '猫的图片/小猫照片/mmexport1776669178859.jpg',
+  '猫的图片/小猫照片/mmexport1776670204155.jpg',
+  '猫的图片/小猫照片/mmexport1776670659207.jpg',
+  '猫的图片/小猫照片/mmexport1779009656955.jpg',
+  '猫的图片/小猫照片/mmexport1779010522122.jpg',
+  '猫的图片/小猫照片/mmexport1779010693154.jpg',
+  '猫的图片/小猫照片/mmexport1780401060812.jpg',
+  '猫的图片/小猫照片/retouch_2026051919200607.jpg',
+  '猫的图片/小猫照片/wx_camera_1777004238069.jpg',
+  '猫的图片/小猫照片/wx_camera_1777198497125.jpg',
+  '猫的图片/小猫照片/wx_camera_1777782845864.jpg',
+  '猫的图片/小猫照片/wx_camera_1778808814923.jpg',
+  '猫的图片/小猫照片/wx_camera_1778808851309.jpg',
+  '猫的图片/小猫照片/wx_camera_1778903358110.jpg',
+  '猫的图片/小猫照片/wx_camera_1779119661782.jpg',
+  '猫的图片/小猫照片/wx_camera_1779189131685.jpg',
+  '猫的图片/小猫照片/wx_camera_1779189401321.jpg',
+  '猫的图片/小猫照片/wx_camera_1779275365521.jpg',
+  '猫的图片/小猫照片/wx_camera_1779331611916.jpg',
+  '猫的图片/小猫照片/wx_camera_1779537120238.jpg',
+  '猫的图片/小猫照片/wx_camera_1779952364736.jpg',
+  '猫的图片/小猫照片/wx_camera_1780024354116.jpg',
+  '猫的图片/小猫照片/wx_camera_1780283309037.jpg',
+  '猫的图片/小猫照片/wx_camera_1780283325734.jpg',
+  '猫的图片/小猫照片/wx_camera_1780456835045.jpg',
+  '猫的图片/小猫照片/wx_camera_1780459158292.jpg',
+  '猫的图片/小猫照片/wx_camera_1780459175389.jpg',
+  '猫的图片/小猫照片/wx_camera_1780459245171.jpg',
+];
+
 async function fetchRealCat() {
+  // 优先用本地猫片
+  if (localCats.length > 0) {
+    return localCats[Math.floor(Math.random() * localCats.length)];
+  }
+  // 本地没图才走API
   try {
     const r = await fetch('https://api.thecatapi.com/v1/images/search?mime_types=jpg,png');
     const d = await r.json();
@@ -250,14 +347,14 @@ function addCatCard(cat) {
   if (cat.isReal) {
     card.innerHTML = `
       <span class="cat-rarity">${rarityLabel} ${cat.acc||''}</span>
-      <img src="${cat.imgUrl}" style="width:100px;height:100px;object-fit:cover;border-radius:50%;margin:4px auto;display:block;border:2px solid rgba(255,255,255,.04)" loading="lazy">
+      <img src="${cat.imgUrl}" style="width:140px;height:140px;object-fit:cover;border-radius:50%;margin:6px auto;display:block;border:3px solid rgba(255,255,255,.06)" loading="lazy">
       <div class="cat-name">${cat.name}</div>
       <div class="cat-bio">${cat.bio}</div>
     `;
   } else {
     card.innerHTML = `
       <span class="cat-rarity">${rarityLabel} ${cat.acc||''}</span>
-      <div style="width:100px;height:100px;border-radius:50%;margin:4px auto;display:flex;align-items:center;justify-content:center;background:${cat.furBg};font-size:3.2rem;border:2px solid rgba(255,255,255,.04)">${cat.face}</div>
+      <div style="width:140px;height:140px;border-radius:50%;margin:6px auto;display:flex;align-items:center;justify-content:center;background:${cat.furBg};font-size:4.5rem;border:3px solid rgba(255,255,255,.06)">${cat.face}</div>
       <div class="cat-name">${cat.name}</div>
       <div class="cat-bio">${cat.bio}</div>
     `;
