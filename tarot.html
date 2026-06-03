@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>赛博塔罗 · 命运之牌</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100svh;background:linear-gradient(135deg,#0d0a1a,#1a0d2e,#0a0d1a);font-family:system-ui,'Segoe UI',sans-serif;display:flex;justify-content:center;align-items:center;padding:1.5rem;touch-action:manipulation}
+.container{text-align:center;max-width:500px;width:100%}
+h1{color:rgba(180,150,255,.5);font-size:1.1rem;font-weight:300;letter-spacing:.3em;margin-bottom:.15rem}
+.sub{color:rgba(255,255,255,.08);font-size:.6rem;margin-bottom:1rem;letter-spacing:.15em}
+
+.deck-area{position:relative;width:180px;height:260px;margin:0 auto 1.2rem;cursor:pointer;perspective:800px}
+.card-back{position:absolute;width:100%;height:100%;border-radius:14px;background:linear-gradient(135deg,#1a0d3e,#2a1a4e);border:2px solid rgba(180,150,255,.1);display:flex;align-items:center;justify-content:center;font-size:2.5rem;box-shadow:0 8px 40px rgba(0,0,0,.3),0 0 60px rgba(180,150,255,.02);transition:transform .3s;user-select:none}
+.card-back:hover{transform:translateY(-4px);box-shadow:0 12px 50px rgba(0,0,0,.4),0 0 80px rgba(180,150,255,.04)}
+.card-back::after{content:'✦';position:absolute;bottom:15px;font-size:.7rem;color:rgba(180,150,255,.2);letter-spacing:.2em}
+.card-back .deck-label{position:absolute;bottom:18px;font-size:.55rem;color:rgba(180,150,255,.15);letter-spacing:.15em}
+
+/* 翻牌动画 */
+.card-flip{position:fixed;z-index:100;pointer-events:none;width:160px;height:230px;border-radius:14px;animation:cardFly .8s ease-out forwards}
+@keyframes cardFly{0%{transform:scale(1) rotate(0);opacity:1}100%{transform:scale(.3) translateY(100px);opacity:0}}
+
+.draw-area{min-height:320px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+
+.card-result{width:180px;background:rgba(255,255,255,.015);border:1px solid rgba(180,150,255,.04);border-radius:18px;padding:1.5rem 1.2rem;margin-bottom:1rem;animation:cardReveal .6s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden}
+@keyframes cardReveal{0%{opacity:0;transform:scale(.8) rotateY(90deg)}100%{opacity:1;transform:scale(1) rotateY(0)}}
+
+.card-number{position:absolute;top:10px;right:14px;font-size:.55rem;color:rgba(180,150,255,.12);letter-spacing:.1em}
+.card-icon{font-size:3rem;margin-bottom:.4rem}
+.card-name{font-size:1rem;font-weight:600;color:rgba(255,255,255,.5);margin-bottom:.2rem}
+.card-arcana{font-size:.6rem;color:rgba(180,150,255,.15);margin-bottom:.6rem;letter-spacing:.15em}
+.card-meaning{font-size:.78rem;color:rgba(255,255,255,.35);line-height:1.6;padding:.6rem;background:rgba(255,255,255,.015);border-radius:10px;margin-bottom:.3rem}
+.card-meaning strong{color:rgba(180,150,255,.4)}
+.card-reverse{font-size:.72rem;color:rgba(255,100,100,.25);line-height:1.5;padding:.4rem;border-left:2px solid rgba(255,100,100,.06);margin-top:.3rem;text-align:left}
+.card-tip{font-size:.68rem;color:rgba(255,215,0,.2);margin-top:.5rem;padding:.4rem;border-top:1px solid rgba(255,215,0,.04);line-height:1.4}
+
+.spread-selector{display:flex;gap:6px;justify-content:center;margin-bottom:.8rem;flex-wrap:wrap}
+.spread-btn{background:rgba(180,150,255,.03);border:1px solid rgba(180,150,255,.06);color:rgba(180,150,255,.3);padding:6px 14px;border-radius:16px;cursor:pointer;font-size:.7rem;font-family:inherit;transition:all .2s}
+.spread-btn:hover{background:rgba(180,150,255,.06);border-color:rgba(180,150,255,.1);color:rgba(180,150,255,.5)}
+.spread-btn.active{background:rgba(180,150,255,.08);border-color:rgba(180,150,255,.15);color:rgba(180,150,255,.6)}
+
+.btn{background:rgba(180,150,255,.03);border:1px solid rgba(180,150,255,.06);color:rgba(180,150,255,.35);padding:10px 30px;border-radius:25px;cursor:pointer;font-size:.85rem;transition:all .2s;font-family:inherit}
+.btn:hover{background:rgba(180,150,255,.06);border-color:rgba(180,150,255,.12);color:rgba(180,150,255,.55)}
+.btn:active{transform:scale(.96)}
+.btn-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:.5rem}
+.btn-home{border-color:rgba(255,215,0,.06);color:rgba(255,215,0,.3);padding:7px 18px;font-size:.72rem}
+.btn-home:hover{border-color:rgba(255,215,0,.12);color:rgba(255,215,0,.5)}
+
+.multi-result{display:flex;gap:10px;overflow-x:auto;padding:.5rem 0;scroll-snap-type:x mandatory;width:100%;scrollbar-width:thin}
+.multi-result::-webkit-scrollbar{height:3px}
+.multi-result::-webkit-scrollbar-thumb{background:rgba(180,150,255,.06);border-radius:2px}
+.mini-card{flex:0 0 150px;scroll-snap-align:start;background:rgba(255,255,255,.01);border:1px solid rgba(180,150,255,.03);border-radius:14px;padding:1rem .8rem;text-align:center;animation:cardReveal .5s ease-out}
+.mini-card .card-icon{font-size:2rem}
+.mini-card .card-name{font-size:.72rem}
+.mini-card .card-meaning{font-size:.65rem;padding:.3rem}
+
+.footer{color:rgba(255,255,255,.04);font-size:.55rem;margin-top:1rem}
+@media(max-width:480px){.card-result{width:100%;padding:1.2rem}.deck-area{width:150px;height:220px}}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🔮 赛博塔罗</h1>
+<div class="sub">点击牌堆 · 抽取你的命运</div>
+
+<div class="deck-area" id="deckArea" onclick="drawCard()">
+  <div class="card-back">
+    🔮<br><span class="deck-label">点击抽牌</span>
+  </div>
+</div>
+
+<div class="spread-selector">
+  <button class="spread-btn active" data-n="1" onclick="setSpread(1)">单张</button>
+  <button class="spread-btn" data-n="3" onclick="setSpread(3)">三张</button>
+  <button class="spread-btn" data-n="5" onclick="setSpread(5)">五张</button>
+</div>
+
+<div class="draw-area" id="drawArea">
+  <div style="font-size:.75rem;color:rgba(255,255,255,.08);padding:2rem 0">点击牌堆抽牌<br>看看命运怎么说</div>
+</div>
+
+<div class="btn-row">
+  <button class="btn" onclick="drawCard()">🔮 抽牌</button>
+  <button class="btn btn-home" onclick="location.href='index.html'">🏠 主页</button>
+</div>
+<div class="footer">每张牌都有正位和逆位 · 命运在你手中</div>
+</div>
+
+<script>
+const CARDS = [
+  {n:'0',name:'愚者',icon:'🧳',mean:'新的开始，天真，冒险，充满可能性。你站在悬崖边，下一步就是跳。',rever:'鲁莽，冒险，不切实际，犹豫不决。不敢跳，但也不想退。',tip:'👣 相信你的直觉，但别忘了看路。'},
+  {n:'I',name:'魔术师',icon:'🎩',mean:'创造力，技能，自信，掌控。你拥有所需的一切工具，就差动手了。',rever:'操控，浪费天赋，未发挥潜力。你有能力但你在摸鱼。',tip:'⚡ 是时候把你的想法变成现实了。'},
+  {n:'II',name:'女祭司',icon:'🌙',mean:'直觉，潜意识，内在智慧。答案不在外面，在你心里。',rever:'秘密，表面现象，缺乏直觉。你在自欺欺人。',tip:'🧠 静下来听听内心的声音。'},
+  {n:'III',name:'女皇',icon:'👑',mean:'丰饶，自然，温柔，美的力量。你被爱和美好包围着。',rever:'依赖，缺乏安全感，创造力受阻。别什么都指望别人。',tip:'🌸 接纳自己，你值得被爱。'},
+  {n:'IV',name:'皇帝',icon:'⚔️',mean:'权威，结构，控制，稳定。需要有人当家——那个人就是你。',rever:'专制，权力滥用，固执。管得太宽了，学会放手。',tip:'🏛️ 用力量保护，而不是压迫。'},
+  {n:'V',name:'教皇',icon:'⛪',mean:'传统，智慧，精神导师。有些事前人已经走通了，相信经验。',rever:'教条，限制，过度依赖权威。别被规则框死了。',tip:'📚 学习前人的智慧，但走自己的路。'},
+  {n:'VI',name:'恋人',icon:'💞',mean:'爱情，选择，结合，价值观的考验。你面临一个重要的选择。',rever:'分离，冲突，价值观不合。选错了人比不选更糟。',tip:'💔 跟随你的心，但别忘了用脑子。'},
+  {n:'VII',name:'战车',icon:'🏎️',mean:'胜利，意志力，决心，行动力。冲过去，你就能赢。',rever:'失控，方向错误，鲁莽。停一下，你看看你在往哪开。',tip:'🏁 有目标的人全世界都会为他让路。'},
+  {n:'VIII',name:'力量',icon:'🦁',mean:'勇气，内在力量，耐心，同情。真正的力量不是征服，而是控制。',rever:'自卑，软弱，失控。你以为你不行，其实你只是怕。',tip:'💪 温柔也是一种力量。'},
+  {n:'IX',name:'隐士',icon:'🏮',mean:'内省，孤独，寻找真理。一个人走的路，往往最值得走。',rever:'孤立，逃避，拒绝帮助。独处和孤独是两回事。',tip:'🔦 找到你自己的光。'},
+  {n:'X',name:'命运之轮',icon:'🎡',mean:'变化，循环，运气，新的阶段。轮子在转，你的好运到了。',rever:'厄运，失控，抗拒改变。轮子还在转，只是转到了下面。',tip:'🌀 一切都会过去的——好的和坏的。'},
+  {n:'XI',name:'正义',icon:'⚖️',mean:'公平，真相，因果报应。该来的总会来。',rever:'不公，谎言，逃避责任。骗得了别人骗不了自己。',tip:'📜 种什么因得什么果。'},
+  {n:'XII',name:'倒吊人',icon:'🔄',mean:'暂停，换位思考，牺牲。换个角度看世界，一切都不一样了。',rever:'拖延，抗拒，不愿放手。吊着是你自己选的。',tip:'🧘 有时候停下来也是一种前进。'},
+  {n:'XIII',name:'死神',icon:'💀',mean:'结束，转变，新生。旧的必须死去，新的才能诞生。',rever:'抗拒改变，停滞，害怕失去。死死抓着不放的样子很难看。',tip:'🌱 结束不是终点，是新的起点。'},
+  {n:'XIV',name:'节制',icon:'⚗️',mean:'平衡，适度，耐心。不偏不倚才是长久之道。',rever:'极端，失衡，浪费。什么都过头了。',tip:'🎯 找到你的平衡点。'},
+  {n:'XV',name:'恶魔',icon:'😈',mean:'束缚，欲望，物质主义。你以为你在享受，其实你在被控。',rever:'觉醒，挣脱，重获自由。你可以离开的。',tip:'🔓 锁是你自己上的，钥匙也在你手里。'},
+  {n:'XVI',name:'高塔',icon:'🗼',mean:'崩塌，剧变，觉醒。墙倒众人推——但也是重建的开始。',rever:'避免灾难，抗拒变化。该塌的迟早会塌。',tip:'🏗️ 推倒了才能建更好的。'},
+  {n:'XVII',name:'星星',icon:'⭐',mean:'希望，灵感，平静，自愈。暴风雨过后，星星会出现的。',rever:'绝望，失去信心。星星还在，只是云遮住了。',tip:'🌟 永远保持希望。'},
+  {n:'XVIII',name:'月亮',icon:'🌕',mean:'恐惧，幻觉，焦虑。你怕的东西多半是想象出来的。',rever:'放下恐惧，看清真相。拉开窗帘看看，天亮了。',tip:'👁️ 恐惧是想象力的黑暗面。'},
+  {n:'XIX',name:'太阳',icon:'☀️',mean:'喜悦，成功，活力，胜利。你做到了！',rever:'暂时的阴霾，小挫折。太阳一直都在。',tip:'😄 开心点，一切都在变好。'},
+  {n:'XX',name:'审判',icon:'📯',mean:'觉醒，重生，内在召唤。你听到了命运在叫你。',rever:'自我怀疑，拒绝召唤。装睡的人是叫不醒的。',tip:'🎵 听从你内心的声音。'},
+  {n:'XXI',name:'世界',icon:'🌍',mean:'完成，圆满，成就。一个周期的结束，一个循环的完美收官。',rever:'未完成，停滞，缺少闭环。差最后一步了。',tip:'🎉 恭喜你，你做到了。下一站——新的旅程。'},
+];
+
+let spreadCount = 1;
+let cardsDrawn = false;
+
+function setSpread(n) {
+  spreadCount = n;
+  document.querySelectorAll('.spread-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.n) === n));
+}
+
+function drawCard() {
+  const area = document.getElementById('drawArea');
+  const deck = document.getElementById('deckArea');
+
+  // 洗牌动画
+  deck.style.transform = 'rotate(180deg) scale(.8)';
+  setTimeout(() => { deck.style.transform = ''; }, 600);
+
+  const shuffleTimes = 3 + Math.floor(Math.random() * 3);
+  let count = 0;
+  const interval = setInterval(() => {
+    deck.querySelector('.card-back').innerHTML = ['🔮','⭐','🌙','💫','🎴'][Math.floor(Math.random()*5)] + '<br><span class="deck-label">洗牌中</span>';
+    count++;
+    if (count >= shuffleTimes) {
+      clearInterval(interval);
+      deck.querySelector('.card-back').innerHTML = '🔮<br><span class="deck-label">翻牌！</span>';
+
+      // 抽牌
+      setTimeout(() => {
+        const drawn = [];
+        const available = [...CARDS];
+        for (let i = 0; i < Math.min(spreadCount, available.length); i++) {
+          const idx = Math.floor(Math.random() * available.length);
+          const card = available.splice(idx, 1)[0];
+          const reversed = Math.random() < 0.3;
+          drawn.push({ ...card, reversed });
+        }
+        showResult(drawn);
+        cardsDrawn = true;
+      }, 400);
+    }
+  }, 150);
+}
+
+function showResult(cards) {
+  const area = document.getElementById('drawArea');
+
+  if (cards.length === 1) {
+    const c = cards[0];
+    area.innerHTML = `
+      <div class="card-result">
+        <span class="card-number">${c.n}</span>
+        <div class="card-icon">${c.icon}</div>
+        <div class="card-name">${c.reversed ? '↕ ' : ''}${c.name}</div>
+        <div class="card-arcana">${c.reversed ? '逆位' : '正位'} · 大阿卡纳</div>
+        <div class="card-meaning">${c.reversed ? c.rever : c.mean}</div>
+        <div class="card-tip">${c.tip}</div>
+      </div>
+      <div style="font-size:.65rem;color:rgba(255,255,255,.06);margin-top:.3rem">${c.reversed ? '逆位提示：放慢脚步，重新审视' : '正位提示：这是你的时机'}</div>
+    `;
+  } else {
+    area.innerHTML = `<div class="multi-result">${cards.map((c,i) => `
+      <div class="mini-card">
+        <span class="card-number" style="font-size:.5rem">${c.n}</span>
+        <div class="card-icon">${c.icon}</div>
+        <div class="card-name">${c.reversed ? '↕' : ''}${c.name}</div>
+        <div class="card-arcana" style="font-size:.5rem">${c.reversed ? '逆位' : '正位'}</div>
+        <div class="card-meaning">${c.reversed ? c.rever : c.mean}</div>
+      </div>`).join('')}</div>
+      <div style="font-size:.6rem;color:rgba(255,255,255,.05);margin-top:.4rem">
+        ${cards.length === 3 ? '过去 · 现在 · 未来' : cards.length === 5 ? '过去 · 现在 · 挑战 · 建议 · 结果' : ''}
+      </div>
+    `;
+  }
+
+  // 粒子
+  const rect = deck.getBoundingClientRect();
+  for (let i = 0; i < 15; i++) {
+    const p = document.createElement('div');
+    p.textContent = ['✨','⭐','💫','🌟'][Math.floor(Math.random()*4)];
+    p.style.cssText = `position:fixed;z-index:999;pointer-events:none;font-size:.8rem;left:${rect.left+rect.width/2}px;top:${rect.top+rect.height/2}px`;
+    document.body.appendChild(p);
+    const a = Math.random()*Math.PI*2, d=40+Math.random()*80;
+    p.animate([
+      {transform:'translate(0,0) scale(1)',opacity:1},
+      {transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px) scale(0)`,opacity:0}
+    ],{duration:600+easing:'ease-out'}).onfinish=()=>p.remove();
+  }
+}
+</script>
+</body>
+</html>

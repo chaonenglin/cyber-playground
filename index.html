@@ -99,6 +99,7 @@
   .card[data-c="6"]:hover { box-shadow: 0 20px 60px rgba(255,100,100,.1); }
   .card[data-c="7"]:hover { box-shadow: 0 20px 60px rgba(200,180,255,.08); }
   .card[data-c="8"]:hover { box-shadow: 0 20px 60px rgba(255,80,80,.08); }
+  .card[data-c="9"]:hover { box-shadow: 0 20px 60px rgba(180,150,255,.08); }
 
   .footer {
     margin-top: 3rem;
@@ -180,10 +181,16 @@
     <span class="name">无限流副本</span>
     <span class="desc">随机传送异世界 · 活下去<br>废弃病院/丧尸围城/修仙秘境</span>
   </a>
+  <a class="card" data-c="9" href="tarot.html">
+    <span class="hotkey">0</span>
+    <span class="icon">🔮</span>
+    <span class="name">赛博塔罗</span>
+    <span class="desc">22张大阿卡纳 · 正逆位<br>命运之牌 · 点击抽取</span>
+  </a>
 </div>
 
 <div class="footer">
-  <kbd>1</kbd>–<kbd>9</kbd> 快速切换 &nbsp;·&nbsp; 每个页面都支持 <kbd>空格</kbd>
+  <kbd>1</kbd>–<kbd>0</kbd> 快速切换 &nbsp;·&nbsp; 每个页面都支持 <kbd>空格</kbd>
 </div>
 
 <script>
@@ -199,6 +206,7 @@
     if (e.key === '7') links[6]?.click();
     if (e.key === '8') links[7]?.click();
     if (e.key === '9') links[8]?.click();
+    if (e.key === '0') links[9]?.click();
   });
 </script>
 </body>
