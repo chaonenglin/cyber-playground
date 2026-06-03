@@ -171,59 +171,68 @@
 
 <script>
 // ====== 猫猫数据库 ======
-const bodyParts = ['😺','😸','😻','😽','🙀','😹','😼','😿','😾','😺','😸','😻','😽','🙀'];
-const faces = ['🗣️','👀','👁️','👄','👅','💋'];
-const accessories = ['🎀','👑','🧢','🥽','🎭','💎','🌸','🍣','🌮','🍕','🧀','🥟','☕','🧋'];
-// 稀有配件 (低概率)
-const rareAcc = ['🌈','⭐','🌙','💫','🎇','🏆','💍','🦄','🍀'];
-
 const adjectives = [
-  '高傲的', '慵懒的', '呆萌的', '霸气的', '委屈的',
-  '优雅的', '肥胖的', '灵活的', '睡不醒的', '爱干饭的',
-  '会写代码的', '看破红尘的', '社恐的', '社交恐怖分子的',
-  '会打乒乓的', '戴眼镜的', '爱看日落的', '数学很好的',
-  '会修电脑的', '会开冰箱的', '偷喝奶茶的',
+  '高傲的','慵懒的','呆萌的','霸气的','委屈的',
+  '优雅的','肥胖的','灵活的','睡不醒的','爱干饭的',
+  '会写代码的','看破红尘的','社恐的','社交恐怖分子的',
+  '会打乒乓的','爱看日落的','数学很好的',
+  '会修电脑的','会开冰箱的','偷喝奶茶的',
 ];
-
 const bios = [
-  '正在思考猫生', '刚睡醒，别惹', '正在偷偷看你',
-  '今天还没吃饭', '其实是一只狗', '假装很高冷',
-  '正在计划统治世界', '代码写得比你好',
-  '已躺平，勿扰', '在等自动喂食器',
-  '正在下载猫粮', '哲学家猫',
-  '昨天偷吃了一整条鱼', '其实是程序员转世',
-  '会开门的反社会猫', '正在玩你的充电线',
+  '正在思考猫生','刚睡醒，别惹','正在偷偷看你',
+  '今天还没吃饭','其实是一只狗','假装很高冷',
+  '正在计划统治世界','代码写得比你好',
+  '已躺平，勿扰','在等自动喂食器',
+  '正在下载猫粮','哲学家猫',
+  '昨天偷吃了一整条鱼','其实是程序员转世',
+  '会开门的反社会猫','正在玩你的充电线',
 ];
+const emojiDecor = ['🎀','👑','🧢','🌸','🍣','🧋','🌈','⭐','💫','🏆'];
 
 // ====== 收集图鉴 ======
 const collection = {};
+let catId = 0;
+let loading = false;
 
-function spawnCat() {
-  const cat = generateCat();
-  addCatCard(cat);
+async function spawnCat() {
+  if (loading) return;
+  loading = true;
+  const cat = await fetchCatImage();
+  if (cat) addCatCard(cat);
+  loading = false;
   return cat;
 }
 
-function generateCat() {
-  const body = bodyParts[Math.floor(Math.random() * bodyParts.length)];
-  const acc = Math.random() < .15
-    ? rareAcc[Math.floor(Math.random() * rareAcc.length)]
-    : accessories[Math.floor(Math.random() * accessories.length)];
-  const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-  const bio = bios[Math.floor(Math.random() * bios.length)];
-
-  const isLegendary = rareAcc.includes(acc) && Math.random() < .3;
-  const rarity = isLegendary ? 'legendary' : Math.random() < .15 ? 'rare' : 'common';
-
-  return {
-    emoji: `${body}${acc}`,
-    name: `${adj}小猫咪`,
-    bio: isLegendary ? '✨ 传说级猫猫！！ ✨' : bio,
-    rarity,
-  };
+async function fetchCatImage() {
+  try {
+    const resp = await fetch('https://api.thecatapi.com/v1/images/search?mime_types=jpg,png');
+    const data = await resp.json();
+    if (!data || !data.length) return generateFallbackCat();
+    const imgUrl = data[0].url;
+    const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+    const bio = bios[Math.floor(Math.random() * bios.length)];
+    const decor = emojiDecor[Math.floor(Math.random() * emojiDecor.length)];
+    const isLegendary = Math.random() < 0.08;
+    const rarity = isLegendary ? 'legendary' : Math.random() < 0.15 ? 'rare' : 'common';
+    return { imgUrl, name: `${adj}小猫咪`, bio: isLegendary ? '✨ 传说级猫猫！！ ✨' : bio, rarity, decor };
+  } catch(e) {
+    return generateFallbackCat();
+  }
 }
 
-let catId = 0;
+function generateFallbackCat() {
+  const fallbacks = [
+    'https://cdn2.thecatapi.com/images/9l0.jpg',
+    'https://cdn2.thecatapi.com/images/MTY3Nzk4Ng.jpg',
+    'https://cdn2.thecatapi.com/images/MTc5NjU0Mg.jpg',
+    'https://cdn2.thecatapi.com/images/MTU4NjE4OA.jpg',
+    'https://cdn2.thecatapi.com/images/bqo.jpg',
+  ];
+  const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const bio = bios[Math.floor(Math.random() * bios.length)];
+  const decor = emojiDecor[Math.floor(Math.random() * emojiDecor.length)];
+  return { imgUrl: fallbacks[Math.floor(Math.random()*fallbacks.length)], name: `${adj}小猫咪`, bio, rarity: 'common', decor };
+}
 
 function addCatCard(cat) {
   const zone = document.getElementById('catZone');
@@ -234,25 +243,29 @@ function addCatCard(cat) {
   const rarityLabel = { common: '普通', rare: '稀有', legendary: '🌟传说' }[cat.rarity] || '普通';
 
   card.innerHTML = `
-    <span class="cat-rarity">${rarityLabel}</span>
-    <span class="cat-emoji">${cat.emoji}</span>
+    <span class="cat-rarity">${rarityLabel} ${cat.decor||''}</span>
+    <img src="${cat.imgUrl}" style="width:100px;height:100px;object-fit:cover;border-radius:50%;margin:4px auto;display:block;border:2px solid rgba(255,255,255,.04)" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐱</text></svg>'">
     <div class="cat-name">${cat.name}</div>
     <div class="cat-bio">${cat.bio}</div>
   `;
 
   // 稀有边框
-  if (cat.rarity === 'rare') card.style.borderColor = 'rgba(100,200,255,.3)';
+  if (cat.rarity === 'rare') {
+    card.style.borderColor = 'rgba(100,200,255,.3)';
+    card.style.background = 'rgba(100,200,255,.03)';
+  }
   if (cat.rarity === 'legendary') {
     card.style.borderColor = 'rgba(255,215,0,.4)';
     card.style.background = 'rgba(255,215,0,.06)';
+    card.style.boxShadow = '0 0 30px rgba(255,215,0,.08)';
   }
 
   // 点击摸摸头
   card.addEventListener('click', function() {
-    this.style.transform = 'scale(.9) rotate(-5deg)';
+    this.style.transform = 'scale(.95) rotate(-3deg)';
     setTimeout(() => { this.style.transform = ''; }, 200);
 
-    const msgs = ['咕噜咕噜~', '喵~', '别摸了！', '...', '继续继续', '手拿开！', '😽'];
+    const msgs = ['咕噜咕噜~', '喵~', '别摸了！', '...', '继续继续', '手拿开！', '😽', '再摸要收费了'];
     this.querySelector('.cat-bio').textContent = msgs[Math.floor(Math.random() * msgs.length)];
   });
 
@@ -291,7 +304,7 @@ function updateStats() {
 
 function showLegend(cat) {
   const msg = document.getElementById('legendMsg');
-  document.getElementById('legendEmoji').textContent = cat.emoji;
+  document.getElementById('legendEmoji').innerHTML = `<img src="${cat.imgUrl}" style="width:80px;height:80px;object-fit:cover;border-radius:50%;border:3px solid rgba(255,215,0,.3);display:inline-block">`;
   document.getElementById('legendText').textContent = `✨ 传说级猫猫降临！ ${cat.name} ✨`;
   msg.classList.add('show');
   setTimeout(() => msg.classList.remove('show'), 3000);
