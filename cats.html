@@ -212,6 +212,7 @@ const emojiDecor = ['🎀','👑','🧢','🌸','🍣','🧋','🌈','⭐','💫
 const collection = {};
 let catId = 0;
 let loading = false;
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
 
 async function spawnCat() {
   if (loading) return;
@@ -271,7 +272,7 @@ async function generateCat(rarity) {
   // 不指定稀有度则按概率随机
   if (!rarity) {
     const roll = Math.random();
-    rarity = roll < 0.06 ? 'legendary' : roll < 0.25 ? 'rare' : 'common';
+    rarity = roll < 0.25 ? 'rare' : 'common';
   }
   // 从对应文件夹随机取一张
   let imgUrl = await loadCatFromFolder('', rarity);
@@ -301,7 +302,7 @@ function generateCatEmoji(rarity) {
   const furBg = furColors[Math.floor(Math.random()*furColors.length)];
   const adj = adjectives[Math.floor(Math.random()*adjectives.length)];
   const bio = bios[Math.floor(Math.random()*bios.length)];
-  if (!rarity) rarity = Math.random()<0.06?'legendary':Math.random()<0.25?'rare':'common';
+  if (!rarity) rarity = Math.random()<0.25?'rare':'common';
   const isLegendary = rarity === 'legendary';
   return { face, acc, furBg, name: `${adj}小猫咪`, bio: isLegendary?'✨ 传说级猫猫！！ ✨':bio, rarity, isReal: false };
 }
@@ -412,6 +413,29 @@ function countByRarity(rar) {
   return document.querySelectorAll(`.cat-card[data-rarity="${rar}"]`).length;
 }
 
+function spawnParticles(rarity, rect) {
+  const isLegend = rarity === 'legendary';
+  const count = isLegend ? 60 : 25;
+  const colors = isLegend
+    ? ['#ffd700','#ff6b6b','#69db7c','#74b9ff','#a29bfe','#fff','#ffa94d']
+    : ['#ffd700','#69db7c','#74b9ff','#fff'];
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.style.cssText = `position:fixed;pointer-events:none;z-index:999;font-size:${isLegend?1.2:0.7}rem;left:${rect.left+rect.width/2}px;top:${rect.top+rect.height/2}px;opacity:1`;
+    p.textContent = isLegend ? pick(['✨','⭐','🌟','💫','🎉','🏆']) : pick(['✨','⭐','💫']);
+    document.body.appendChild(p);
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 30 + Math.random() * (isLegend ? 200 : 100);
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist;
+    const dur = 0.6 + Math.random() * (isLegend ? 0.8 : 0.4);
+    p.animate([
+      { transform: 'translate(0,0) scale(1)', opacity: 1 },
+      { transform: `translate(${dx}px,${dy}px) scale(${isLegend?1.5:0.5})`, opacity: 0 }
+    ], { duration: dur * 1000, easing: 'ease-out' }).onfinish = () => p.remove();
+  }
+}
+
 function updateStats() {
   const total = document.querySelectorAll('.cat-card').length;
   document.getElementById('catCount').textContent = total;
@@ -436,10 +460,8 @@ async function synthesize() {
   // 生成1张高级的
   const cat = await generateCat(to);
   addCatCard(cat);
-  // 合成特效
-  const panel = document.getElementById('synthesisPanel');
-  panel.style.boxShadow = '0 0 40px rgba(255,215,0,.1)';
-  setTimeout(() => panel.style.boxShadow = '', 600);
+  // 粒子特效
+  spawnParticles(to, cards[0].getBoundingClientRect());
   btn.disabled = true;
   btn.textContent = '暂无可合成的猫';
   markDuplicates();
