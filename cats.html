@@ -177,10 +177,9 @@
 
 <!-- 合成面板 -->
 <div class="synthesis-panel" id="synthesisPanel">
-  <div class="synth-title">🔮 合成</div>
+  <div class="synth-title">🔮 合成（3张相同猫片 → 高级稀有度）</div>
   <div class="synth-btns">
-    <button class="synth-btn" id="synthRare" onclick="synthesize('common','rare')" disabled>3普通 → 1稀有 <span id="synthRareCount">(0/3)</span></button>
-    <button class="synth-btn" id="synthLegend" onclick="synthesize('rare','legendary')" disabled>3稀有 → 1传说 <span id="synthLegendCount">(0/3)</span></button>
+    <button class="synth-btn" id="synthBtn" onclick="synthesize()" disabled>暂无可合成的猫</button>
   </div>
 </div>
 
@@ -352,7 +351,10 @@ function addCatCard(cat) {
   });
 
   card.dataset.rarity = cat.rarity;
+  if (cat.isReal) card.dataset.img = cat.imgUrl;
   zone.appendChild(card);
+  // 标记重复数量
+  markDuplicates();
   updateStats();
 
   // 传说级特效
@@ -375,6 +377,37 @@ function clearCats() {
   document.getElementById('legendMsg').classList.remove('show');
 }
 
+function markDuplicates() {
+  // 清除旧标记
+  document.querySelectorAll('.dup-count').forEach(e=>e.remove());
+  document.querySelectorAll('.cat-card').forEach(c=>c.style.outline='');
+  // 按相同图片分组
+  const groups = {};
+  document.querySelectorAll('.cat-card[data-img]').forEach(c=>{
+    const img = c.dataset.img;
+    if (!groups[img]) groups[img] = [];
+    groups[img].push(c);
+  });
+  // 有3+张相同图片的标记
+  for (const [img, cards] of Object.entries(groups)) {
+    if (cards.length >= 3) {
+      cards.forEach(c => {
+        c.style.outline = '2px solid rgba(255,215,0,.3)';
+        const badge = document.createElement('div');
+        badge.className = 'dup-count';
+        badge.textContent = `×${cards.length}`;
+        badge.style.cssText = 'position:absolute;bottom:6px;right:8px;background:rgba(255,215,0,.15);color:#ffd700;font-size:.65rem;padding:1px 6px;border-radius:8px;border:1px solid rgba(255,215,0,.2);z-index:5';
+        c.appendChild(badge);
+      });
+      // 合成按钮显示可合成
+      const btn = document.getElementById('synthBtn');
+      btn.disabled = false;
+      btn.textContent = `🔄 合成 (${cards[0].querySelector('.cat-name').textContent}×3 → 稀有)`;
+      btn.dataset.targetImg = img;
+    }
+  }
+}
+
 function countByRarity(rar) {
   return document.querySelectorAll(`.cat-card[data-rarity="${rar}"]`).length;
 }
@@ -386,21 +419,18 @@ function updateStats() {
   const r = countByRarity('rare');
   const c = countByRarity('common');
   document.getElementById('rarityCount').textContent = `🌟${l} 💎${r} 📦${c}`;
-
-  // 合成按钮
-  const btnR = document.getElementById('synthRare');
-  const btnL = document.getElementById('synthLegend');
-  btnR.disabled = c < 3;
-  btnL.disabled = r < 3;
-  document.getElementById('synthRareCount').textContent = `(${c}/3)`;
-  document.getElementById('synthLegendCount').textContent = `(${r}/3)`;
-  if (c >= 3) btnR.classList.add('active'); else btnR.classList.remove('active');
-  if (r >= 3) btnL.classList.add('active'); else btnL.classList.remove('active');
+  // 合成按钮状态在markDuplicates里维护
 }
 
-async function synthesize(from, to) {
-  const cards = document.querySelectorAll(`.cat-card[data-rarity="${from}"]`);
+async function synthesize() {
+  const btn = document.getElementById('synthBtn');
+  const targetImg = btn.dataset.targetImg;
+  if (!targetImg) return;
+  // 找到3张相同图片的卡
+  const cards = document.querySelectorAll(`.cat-card[data-img="${targetImg}"]`);
   if (cards.length < 3) return;
+  const rarity = cards[0].dataset.rarity;
+  const to = rarity === 'common' ? 'rare' : 'legendary';
   // 移除3张
   for (let i = 0; i < 3; i++) cards[i].remove();
   // 生成1张高级的
@@ -410,6 +440,9 @@ async function synthesize(from, to) {
   const panel = document.getElementById('synthesisPanel');
   panel.style.boxShadow = '0 0 40px rgba(255,215,0,.1)';
   setTimeout(() => panel.style.boxShadow = '', 600);
+  btn.disabled = true;
+  btn.textContent = '暂无可合成的猫';
+  markDuplicates();
   updateStats();
 }
 
